@@ -20,7 +20,7 @@ const { kind, href, title, meta, note, year, coverSubtitle, label } = Astro.prop
   href={href}
   class="group flex h-full flex-col border-[1.5px] border-ink bg-cream p-2 shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
 >
-  <CoverArt kind={kind} title={title} subtitle={coverSubtitle} year={year} class="w-full" />
+  <CoverArt kind={kind} title={title} subtitle={coverSubtitle} year={year} seed={href.split('/').filter(Boolean).pop()} class="w-full" />
   <div class="flex min-w-0 flex-1 flex-col px-1 pb-1 pt-2">
     <span class="truncate font-display text-[15px] leading-tight text-ink">{title}</span>
     <span class="mt-0.5 truncate font-mono text-[9.5px] tracking-[0.1em] text-ink-faint">{meta}</span>
