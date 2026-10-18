@@ -1,0 +1,105 @@
+---
+/**
+ * 授权实拍图：图片 + 作者 / 协议 / 原始页面。
+ * 用于老物件详情页 Hero、画廊，以及关于页「图片来源」。
+ * 图片信息缺失时只显示已有字段，不编造来源。
+ */
+import type { ImageCredit } from '../../types';
+
+interface Props {
+  image: ImageCredit;
+  ratio?: 'square' | 'landscape' | 'portrait';
+  tone?: 'light' | 'dark';
+  eager?: boolean;
+  caption?: boolean;
+  class?: string;
+}
+
+const {
+  image,
+  ratio = 'landscape',
+  tone = 'light',
+  eager = false,
+  caption = true,
+  class: className = '',
+} = Astro.props;
+
+const ratioClass =
+  ratio === 'square' ? 'aspect-square' : ratio === 'portrait' ? 'aspect-[3/4]' : 'aspect-[4/3]';
+const isDark = tone === 'dark';
+const frameClass = isDark
+  ? 'border-cream/25 bg-cream/[0.04]'
+  : 'border-ink bg-paper-deep';
+const captionClass = isDark ? 'text-cream/45' : 'text-ink-faint';
+const linkClass = isDark
+  ? 'underline decoration-cream/25 underline-offset-2 transition-colors hover:text-mustard'
+  : 'underline decoration-ink/25 underline-offset-2 transition-colors hover:text-vermilion';
+const alt = image.alt || image.title || '老物件实拍图';
+const hasCaption = Boolean(image.title || image.author || image.license || image.sourceUrl);
+---
+<figure class:list={['group/photo', className]}>
+  <div class:list={['relative overflow-hidden border-[1.5px]', frameClass]}>
+    <div class:list={['relative', ratioClass]}>
+      <img
+        src={image.src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover/photo:scale-[1.03]"
+      />
+      <span
+        class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent"
+        aria-hidden="true"
+      ></span>
+    </div>
+    <span
+      class:list={[
+        'absolute left-0 top-0 px-2 py-1 font-mono text-[8px] font-bold tracking-[0.2em]',
+        isDark ? 'bg-cream/90 text-ink' : 'bg-ink text-cream',
+      ]}
+    >
+      PHOTO
+    </span>
+    <span
+      class:list={[
+        'pointer-events-none absolute bottom-2 right-2 font-mono text-[8px] tracking-[0.18em]',
+        isDark ? 'text-cream/40' : 'text-cream/70',
+      ]}
+      aria-hidden="true"
+    >
+      {image.license ?? ''}
+    </span>
+  </div>
+
+  {
+    caption && hasCaption && (
+      <figcaption
+        class:list={[
+          'mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-[9px] leading-4 tracking-[0.08em]',
+          captionClass,
+        ]}
+      >
+        {image.title && <span class="font-bold">{image.title}</span>}
+        {image.author && <span>摄影 {image.author}</span>}
+        {image.license &&
+          (image.licenseUrl ? (
+            <a
+              href={image.licenseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class={linkClass}
+            >
+              {image.license}
+            </a>
+          ) : (
+            <span>{image.license}</span>
+          ))}
+        {image.sourceUrl && (
+          <a href={image.sourceUrl} target="_blank" rel="noopener noreferrer" class={linkClass}>
+            原始页面 ↗
+          </a>
+        )}
+      </figcaption>
+    )
+  }
+</figure>

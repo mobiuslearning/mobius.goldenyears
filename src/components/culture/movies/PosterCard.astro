@@ -38,6 +38,7 @@ const tapeNo = String(index + 1).padStart(2, '0');
   data-region={movie.region}
   data-search={search}
 >
+  <a href={`/movies/${movie.id}/`} class="flex flex-1 flex-col" aria-label={`打开《${movie.title}》的影片档案`}>
   <!-- 海报：像贴在录像厅墙上的那一张 -->
   <div
     class="relative border-[1.5px] border-cream/25 bg-night-soft p-1.5 transition-[transform,border-color] duration-300 group-hover/poster:-translate-y-1.5 group-hover/poster:border-mustard/70"
@@ -101,23 +102,29 @@ const tapeNo = String(index + 1).padStart(2, '0');
         </blockquote>
       )
     }
-    {
-      movie.themeSong && (
-        <div class="mt-auto inline-flex max-w-full items-center gap-1.5 border border-cream/20 bg-cream/[0.04] px-2 py-1 pt-1.5">
-          <span class="flex shrink-0 items-center gap-0.5" aria-hidden="true">
-            <span class="relative grid h-3 w-3 place-items-center rounded-full border border-mustard/70">
-              <span class="h-[3px] w-[3px] rounded-full bg-mustard/80" />
+    <div class="mt-auto flex items-end justify-between gap-1.5 pt-2">
+      {
+        movie.themeSong ? (
+          <div class="inline-flex min-w-0 max-w-full items-center gap-1.5 border border-cream/20 bg-cream/[0.04] px-2 py-1">
+            <span class="flex shrink-0 items-center gap-0.5" aria-hidden="true">
+              <span class="relative grid h-3 w-3 place-items-center rounded-full border border-mustard/70">
+                <span class="h-[3px] w-[3px] rounded-full bg-mustard/80" />
+              </span>
+              <span class="relative grid h-3 w-3 place-items-center rounded-full border border-mustard/70">
+                <span class="h-[3px] w-[3px] rounded-full bg-mustard/80" />
+              </span>
             </span>
-            <span class="relative grid h-3 w-3 place-items-center rounded-full border border-mustard/70">
-              <span class="h-[3px] w-[3px] rounded-full bg-mustard/80" />
+            <span class="shrink-0 font-mono text-[8px] tracking-[0.14em] text-cream/40">A面</span>
+            <span class="truncate font-mono text-[9px] text-cream/65">
+              {movie.themeSong.title} · {movie.themeSong.artist}
             </span>
-          </span>
-          <span class="shrink-0 font-mono text-[8px] tracking-[0.14em] text-cream/40">A面</span>
-          <span class="truncate font-mono text-[9px] text-cream/65">
-            {movie.themeSong.title} · {movie.themeSong.artist}
-          </span>
-        </div>
-      )
-    }
+          </div>
+        ) : (
+          <span />
+        )
+      }
+      <span class="shrink-0 font-mono text-[8px] tracking-[0.14em] text-mustard/70">档案 →</span>
+    </div>
   </div>
+  </a>
 </article>

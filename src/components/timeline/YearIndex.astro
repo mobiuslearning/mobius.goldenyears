@@ -1,0 +1,122 @@
+---
+import { eras } from '../../data/site';
+import { accentMap, type AccentKey } from '../../lib/theme';
+import type { Era, EventScope } from '../../types';
+import SectionHeader from '../shared/SectionHeader.astro';
+
+interface YearCard {
+  year: number;
+  count: number;
+  highlightTitle?: string;
+  scope?: EventScope;
+}
+
+interface Props {
+  years: YearCard[];
+  totalEvents: number;
+  coveredYears: number;
+}
+
+const { years, totalEvents, coveredYears } = Astro.props;
+
+interface EraGroup {
+  era: Era;
+  cards: YearCard[];
+  count: number;
+}
+
+const groups: EraGroup[] = eras.map((era) => {
+  const cards = years.filter((item) => {
+    const start = Number(era.years.split('–')[0]);
+    const end = Number(era.years.split('–')[1]);
+    return item.year >= start && item.year <= end;
+  });
+  return {
+    era,
+    cards,
+    count: cards.reduce((sum, item) => sum + item.count, 0),
+  };
+});
+
+const toneOf = (era: Era) => accentMap[era.color as AccentKey];
+---
+
+<section
+  id="year-index"
+  class="relative scroll-mt-[7rem] overflow-hidden border-t-[1.5px] border-ink/15 bg-paper py-14 sm:py-20 lg:scroll-mt-[10.5rem]"
+  aria-label="按年份打开"
+>
+  <div class="pointer-events-none absolute inset-0 opacity-40 line-grid" aria-hidden="true"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <SectionHeader
+      index="03"
+      eyebrow="Open A Year"
+      title="按年份打开"
+      description="三十年，一格一年。每一格里是那一年最该记住的事，点开就是一整年：那天发生的事、那年的歌、书、电影和手里的玩意儿。"
+      accent="vermilion"
+    />
+
+    <p class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-[0.16em] text-ink-faint">
+      <span>{coveredYears} 个年份</span>
+      <span aria-hidden="true">·</span>
+      <span>{totalEvents} 条事件</span>
+      <span aria-hidden="true">·</span>
+      <span>点击任意年份进入年度页</span>
+    </p>
+
+    <div class="mt-8 space-y-8">
+      {
+        groups.map((group) => {
+          const tone = toneOf(group.era);
+          return (
+            <div>
+              <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-[1.5px] border-ink/30 pb-2">
+                <span class:list={['inline-block h-2.5 w-2.5 self-center', tone.bg]} aria-hidden="true" />
+                <h3 class="font-display text-lg leading-none text-ink sm:text-xl">{group.era.label}</h3>
+                <span class="font-display text-base text-ink-soft sm:text-lg">{group.era.name}</span>
+                <span class="ml-auto font-mono text-[9px] tracking-[0.16em] text-ink-faint">
+                  {group.era.years} · {group.count} 条
+                </span>
+              </div>
+
+              <ul class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+                {group.cards.map((card) => (
+                  <li>
+                    <a
+                      href={`/timeline/${card.year}/`}
+                      class="group flex h-full flex-col border-[1.5px] border-ink border-l-[3px] bg-cream p-3 shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
+                      style={`border-left-color: var(--color-${group.era.color})`}
+                    >
+                      <span class="flex items-baseline justify-between gap-2">
+                        <span class="font-display text-2xl leading-none tracking-tight text-ink">{card.year}</span>
+                        <span class="shrink-0 font-mono text-[9px] tracking-[0.1em] text-ink-faint">
+                          {card.count} 件
+                        </span>
+                      </span>
+                      <span class="mt-2 line-clamp-2 min-h-[2.5rem] text-[11.5px] leading-5 text-ink-soft">
+                        {card.highlightTitle ?? '年度大事件整理中'}
+                      </span>
+                      <span class="mt-auto flex items-center justify-between pt-2.5 font-mono text-[9px] tracking-[0.12em] text-ink-faint">
+                        <span class="flex items-center gap-1">
+                          <span
+                            class:list={[
+                              'inline-block h-1.5 w-1.5 rounded-full',
+                              card.scope === 'china' ? 'bg-vermilion' : 'bg-sky',
+                            ]}
+                          />
+                          {card.scope === 'china' ? '中国' : card.scope === 'global' ? '世界' : group.era.label}
+                        </span>
+                        <span class="transition-colors group-hover:text-vermilion">打开这一年 →</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

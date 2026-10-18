@@ -12,16 +12,20 @@ import { books } from '../data/culture/books';
 import { movies } from '../data/culture/movies';
 import { toys } from '../data/nostalgia/toys';
 import { extraGroups } from '../data/nostalgia/extras';
+import { imageCredits } from '../data/images';
 
 const now = new Date();
 const year = now.getFullYear();
 const dateCN = `${year} 年 ${now.getMonth() + 1} 月`;
 const extraCount = extraGroups.reduce((total, group) => total + group.items.length, 0);
+/** 详情页数量随四类内容数据自动统计（音乐/书籍/影视/老物件） */
+const detailCount = songs.length + books.length + movies.length + toys.length;
 
 const heroStats = [
   { label: '建站', value: '2026' },
   { label: '覆盖年份', value: '1980—2009' },
-  { label: '页面', value: '9 个' },
+  { label: '栏目页', value: '9 个' },
+  { label: '详情页', value: `${detailCount} 个` },
   { label: '评论系统', value: 'Twikoo · 待接入' },
 ];
 
@@ -32,6 +36,9 @@ const inventory = [
   { label: '影视条目', value: movies.length, unit: '部' },
   { label: '老物件展品', value: toys.length, unit: '件' },
   { label: '后厅藏品', value: extraCount, unit: '件' },
+  ...(imageCredits.length > 0
+    ? [{ label: '授权实拍图', value: imageCredits.length, unit: '张' }]
+    : []),
 ];
 
 const credits = [
@@ -40,8 +47,8 @@ const credits = [
     body: '站内文案由编辑撰写整理，年份以作品的首播、发行或上市年份为准。不同地区对同一件东西的叫法差别很大，我们在别名里尽量多收了几种，但不可能穷尽——你那儿叫什么，欢迎补充。',
   },
   {
-    title: '封面与插画',
-    body: '所有封面都由程序按标题和年份生成，不使用图库图片，也没有任何外部图片请求。同一件作品每次生成的图案都一样，不会换一张脸。',
+    title: '封面与实拍图',
+    body: '书籍、音乐、影视的封面由程序按标题与年份生成，不使用图库图片。老物件详情页的实拍图来自 Wikimedia Commons 等公开授权来源（CC0 / 公有领域 / CC BY / CC BY-SA），逐张标注作者、协议与原始页面，见下方「图片来源」。所有图片都已下载到站内，不请求外部图床。',
   },
   {
     title: '引用与版权',
@@ -63,6 +70,7 @@ const stack = [
   { key: '交互', value: '原生 TypeScript：筛选、搜索、滚动入场、键盘快捷键「/」' },
   { key: '动效', value: '只做滚动入场和少量 hover；全部尊重 prefers-reduced-motion' },
   { key: '封面', value: '程序化生成（hash → 配色与纹理），不依赖外部图片' },
+  { key: '图片', value: '详情页实拍图来自 CC 授权图库，下载到站内托管，作者与协议逐张标注' },
   {
     key: '3D',
     value: 'three.js 只用在首页 Hero 的星空时间隧道：动态 import，reduced-motion 时跳过，不可用时降级为静态星空；其余页面不加载',
@@ -91,6 +99,12 @@ const craftNotes = [
 ];
 
 const changelog = [
+  {
+    date: '2026.10',
+    tag: '详情页',
+    title: '老物件可以单独打开看了',
+    note: '每件老物件有了自己的展签页：实拍图、长文、玩法步骤、那一年的事件、同类推荐，以及上一件 / 下一件。关于页新增「图片来源」，逐张列出作者、协议和原始页面。',
+  },
   {
     date: '2026.10',
     tag: '上线',
@@ -352,6 +366,98 @@ const changelog = [
           }
         </div>
       </div>
+
+      <!-- 图片来源 -->
+      <Reveal>
+        <div id="image-credits" class="mt-12 scroll-mt-24 border-t-[1.5px] border-dashed border-ink/25 pt-10">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p class="label-mono text-vermilion">Image Credits</p>
+              <h3 class="mt-2 font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight text-ink">图片来源</h3>
+              <p class="mt-2 max-w-2xl text-sm leading-7 text-ink-soft text-pretty">
+                老物件详情页的实拍图来自 Wikimedia Commons 等公开授权图库，全部下载到站内，不请求外部图床。每张图保留作者、协议和原始页面。
+              </p>
+            </div>
+            <span class:list={['stamp shrink-0', imageCredits.length > 0 ? 'text-jade' : 'text-ink-faint']}>
+              {imageCredits.length > 0 ? `${imageCredits.length} 张 · 已标注授权` : '整理中'}
+            </span>
+          </div>
+
+          {
+            imageCredits.length > 0 ? (
+              <ul class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {imageCredits.map((credit, index) => (
+                  <li class="group flex h-full flex-col border-[1.5px] border-ink bg-cream shadow-print-sm">
+                    <a
+                      href={credit.sourceUrl ?? credit.src}
+                      target={credit.sourceUrl ? '_blank' : undefined}
+                      rel={credit.sourceUrl ? 'noopener noreferrer' : undefined}
+                      aria-label={`${credit.title ?? '实拍图'} · 打开原始页面`}
+                      class="relative block aspect-[4/3] overflow-hidden border-b-[1.5px] border-ink/15 bg-paper-deep"
+                    >
+                      <img
+                        src={credit.src}
+                        alt={credit.alt || credit.title || '授权实拍图'}
+                        loading="lazy"
+                        decoding="async"
+                        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                      <span class="absolute left-0 top-0 bg-ink px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cream">
+                        PHOTO {String(index + 1).padStart(2, '0')}
+                      </span>
+                    </a>
+                    <div class="flex flex-1 flex-col p-3">
+                      <p class="font-display text-base leading-snug text-ink">
+                        {credit.title ?? '未命名图片'}
+                      </p>
+                      <p class="mt-1 font-mono text-[9px] leading-4 tracking-[0.1em] text-ink-faint">
+                        {credit.author ? `摄影 ${credit.author}` : '作者未标注'}
+                      </p>
+                      <div class="mt-auto flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2 font-mono text-[9px] tracking-[0.1em]">
+                        {credit.license &&
+                          (credit.licenseUrl ? (
+                            <a
+                              href={credit.licenseUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-ink-faint underline decoration-ink/25 underline-offset-2 transition-colors hover:text-vermilion"
+                            >
+                              {credit.license}
+                            </a>
+                          ) : (
+                            <span class="text-ink-faint">{credit.license}</span>
+                          ))}
+                        {credit.sourceUrl && (
+                          <a
+                            href={credit.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-ink-faint underline decoration-ink/25 underline-offset-2 transition-colors hover:text-vermilion"
+                          >
+                            原始页面 ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div class="mt-6 border-[1.5px] border-dashed border-ink/30 bg-cream/60 p-6 sm:p-7">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="max-w-2xl">
+                    <p class="font-display text-lg text-ink">实拍图正在核对授权</p>
+                    <p class="mt-2 text-sm leading-7 text-ink-soft text-pretty">
+                      图片库暂时是空的。等授权信息核对完成，实拍图会先出现在老物件详情页，并在这里逐张列出作者、协议和原始页面。在那之前，所有封面与展品图仍由程序生成。
+                    </p>
+                  </div>
+                  <span class="stamp shrink-0 text-ink-faint">IMAGES · PENDING</span>
+                </div>
+              </div>
+            )
+          }
+        </div>
+      </Reveal>
     </div>
   </section>
 

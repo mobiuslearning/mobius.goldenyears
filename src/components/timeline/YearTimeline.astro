@@ -1,0 +1,152 @@
+---
+import type { TimeEvent } from '../../types';
+
+interface Props {
+  year: number;
+  events: TimeEvent[];
+}
+
+const { year, events } = Astro.props;
+
+function dateParts(date: string | undefined): { month: string; day: string; full: string } | null {
+  if (!date) return null;
+  const parts = date.split('-');
+  if (parts.length < 3) return null;
+  return { month: parts[1], day: parts[2], full: date };
+}
+
+const ordered = events.map((event) => ({ event, date: dateParts(event.date) }));
+---
+
+<section id="year-timeline" class="relative scroll-mt-24 bg-paper py-12 sm:py-16">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-end lg:gap-12">
+      <header>
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[11px] font-bold tracking-[0.3em] text-vermilion">01</span>
+          <span class="h-px w-8 bg-vermilion opacity-60" aria-hidden="true"></span>
+          <span class="font-mono text-[10px] uppercase tracking-[0.32em] text-ink-faint">Year Timeline</span>
+        </div>
+        <h2 class="mt-3 font-display text-[clamp(1.8rem,4vw,2.8rem)] leading-[1.15] text-ink">
+          {year} 年，这一年发生的 {events.length} 件事
+        </h2>
+        <p class="mt-4 max-w-2xl text-[14px] leading-8 text-ink-soft text-pretty">
+          按日期排好的一年。中国的事用朱红，外面的世界用灰蓝；带「年度大事件」印章的那一条，是这一年里最该记住的。
+        </p>
+      </header>
+      <div class="hidden border-l-[1.5px] border-ink/20 pl-4 lg:block">
+        <p class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">ON THIS PAGE</p>
+        <ul class="mt-2 space-y-1.5 font-mono text-[10px] tracking-[0.1em] text-ink-soft">
+          <li><a class="link-underline" href="#year-culture">那一年听、看、读、玩 →</a></li>
+          <li><a class="link-underline" href={`/timeline/#year-${year}`}>完整时光轴里的 {year} →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <ol class="relative mt-10">
+      <span class="absolute bottom-4 left-[9px] top-4 w-px bg-ink/15" aria-hidden="true"></span>
+      {
+        ordered.map(({ event, date }) => {
+          const isChina = event.scope === 'china';
+          const scopeLabel = isChina ? '中国' : '世界';
+          return (
+            <li class="relative pb-5 pl-8 last:pb-0 sm:pl-12">
+              <span
+                aria-hidden="true"
+                class:list={[
+                  'absolute left-[9px] top-[1.35rem] h-2.5 w-2.5 -translate-x-1/2 rounded-full ring-4 ring-paper',
+                  isChina ? 'bg-vermilion' : 'bg-sky',
+                ]}
+              />
+              <span
+                aria-hidden="true"
+                class:list={[
+                  'absolute left-[9px] top-[1.55rem] h-px w-5',
+                  isChina ? 'bg-vermilion/40' : 'bg-sky/40',
+                ]}
+              />
+
+              <div class="lg:grid lg:grid-cols-[5.5rem_minmax(0,1fr)] lg:gap-5">
+                <!-- 桌面日期列 -->
+                <div class="hidden pt-4 text-right lg:block">
+                  {
+                    date ? (
+                      <>
+                        <span class="block font-mono text-[15px] leading-none tracking-[0.06em] text-ink">{date.month}.{date.day}</span>
+                        <span class="mt-1 block font-mono text-[9px] tracking-[0.16em] text-ink-faint">{year}</span>
+                      </>
+                    ) : (
+                      <span class="block font-mono text-[10px] leading-relaxed tracking-[0.12em] text-ink-faint">日期<br />不详</span>
+                    )
+                  }
+                </div>
+
+                <div
+                  class:list={[
+                    'paper-card relative p-4 sm:p-5',
+                    isChina ? 'border-l-[3px] border-l-vermilion' : 'border-l-[3px] border-l-sky',
+                  ]}
+                >
+                  <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                    <span
+                      class:list={[
+                        'stamp',
+                        isChina
+                          ? 'border-vermilion/60 bg-vermilion/10 text-vermilion'
+                          : 'border-sky/70 bg-sky/15 text-ink-soft',
+                      ]}
+                    >
+                      {scopeLabel}
+                    </span>
+                    <span class="border border-ink/20 px-1.5 py-0.5 text-[10px] tracking-[0.08em] text-ink-soft">
+                      {event.category}
+                    </span>
+                    <span class="font-mono text-[10px] tracking-[0.14em] text-ink-faint lg:hidden">
+                      {date ? `${date.month}.${date.day}` : '日期不详'}
+                    </span>
+                    {event.highlight && (
+                      <span class="ml-auto border border-vermilion bg-vermilion/5 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-[0.18em] text-vermilion">
+                        年度大事件
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 class="mt-2.5 font-display text-[1.2rem] leading-snug text-ink sm:text-[1.4rem]">
+                    {event.title}
+                  </h3>
+                  <p class="mt-2 text-[13.5px] leading-[1.85] text-ink-soft text-pretty">{event.description}</p>
+
+                  {event.impact && (
+                    <p class="mt-3 flex gap-2 border-l-2 border-vermilion/45 pl-3 text-[12.5px] leading-6 text-ink-faint">
+                      <span class="shrink-0 font-mono text-[9px] tracking-[0.16em] text-vermilion">影响</span>
+                      <span class="min-w-0">{event.impact}</span>
+                    </p>
+                  )}
+
+                  {event.tags && event.tags.length > 0 && (
+                    <ul class="mt-3 flex flex-wrap gap-1.5">
+                      {event.tags.map((tag) => (
+                        <li class="border border-ink/20 bg-paper-deep/35 px-1.5 py-0.5 font-mono text-[10px] tracking-[0.06em] text-ink-faint">
+                          #{tag}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    {
+      events.length === 0 && (
+        <div class="mt-8 border-[1.5px] border-dashed border-ink/25 bg-cream/60 p-8 text-center">
+          <p class="font-display text-lg text-ink">这一年的时间轴还空着。</p>
+          <p class="mt-2 text-[13px] text-ink-soft">事件还在整理，先去别的年份看看吧。</p>
+        </div>
+      )
+    }
+  </div>
+</section>

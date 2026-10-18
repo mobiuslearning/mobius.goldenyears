@@ -20,6 +20,7 @@ const chrome = spawn(
     '--disable-breakpad',
     '--no-first-run',
     '--no-default-browser-check',
+    '--autoplay-policy=no-user-gesture-required',
     `--user-data-dir=${profile}`,
     `--crash-dumps-dir=${profile}/crashes`,
     `--remote-debugging-port=${port}`,
@@ -86,6 +87,7 @@ try {
     expression,
     returnByValue: true,
     awaitPromise: true,
+    userGesture: true,
   });
   const value = result.result.value ?? result.result.description ?? result.result;
   console.log(JSON.stringify({ value, consoleErrors }, null, 2));

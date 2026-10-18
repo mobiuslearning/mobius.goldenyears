@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeader from '../../components/shared/SectionHeader.astro';
+import SongDetailHero from '../../components/culture/music/SongDetailHero.astro';
+import YearEvents from '../../components/culture/music/YearEvents.astro';
+import RelatedSongs from '../../components/culture/music/RelatedSongs.astro';
+import SongNav from '../../components/culture/music/SongNav.astro';
+import { songs } from '../../data/culture/music';
+import { eventsForYear } from '../../data/events';
+import { eraOfYear } from '../../lib/theme';
+import type { Song } from '../../types';
+
+export function getStaticPaths() {
+  return songs.map((song) => ({
+    params: { id: song.id },
+    props: { song },
+  }));
+}
+
+interface Props {
+  song: Song;
+}
+
+const { song } = Astro.props;
+
+const sorted = [...songs].sort((a, b) => a.year - b.year || a.title.localeCompare(b.title, 'zh'));
+const position = sorted.findIndex((item) => item.id === song.id);
+const catalogNo = position >= 0 ? String(position + 1).padStart(2, '0') : '—';
+const prev = position > 0 ? sorted[position - 1] : undefined;
+const next = position >= 0 && position < sorted.length - 1 ? sorted[position + 1] : undefined;
+
+const side = position >= 0 && position < Math.ceil(sorted.length / 2) ? 'A' : 'B';
+const era = eraOfYear(song.year);
+const eraLabel = era === 'classic' ? '其他年代' : era;
+const accent = era === '1980s' ? 'vermilion' : era === '1990s' ? 'jade' : 'mustard';
+
+const yearEventList = [...eventsForYear(song.year)].sort(
+  (a, b) => Number(Boolean(b.highlight)) - Number(Boolean(a.highlight)),
+);
+const yearEvents = yearEventList.slice(0, 4);
+
+const related = (() => {
+  const candidates = sorted
+    .filter((item) => item.id !== song.id)
+    .map((item) => {
+      const sameEra = eraOfYear(item.year) === era;
+      const sameRegion = item.region === song.region;
+      const sameGenre = Boolean(item.genre && item.genre === song.genre);
+      return {
+        item,
+        score: (sameEra ? 4 : 0) + (sameRegion ? 2 : 0) + (sameGenre ? 1 : 0),
+        diff: Math.abs(item.year - song.year),
+      };
+    })
+    .sort((a, b) => b.score - a.score || a.diff - b.diff || a.item.title.localeCompare(b.item.title, 'zh'));
+  return candidates.slice(0, 4).map((entry) => entry.item);
+})();
+
+const gallery = song.gallery ?? [];
+const storyParagraphs = (song.story ?? '').split(/\n+/).map((part) => part.trim()).filter(Boolean);
+const plainDescription =
+  song.description.length > 118 ? `${song.description.slice(0, 118)}…` : song.description;
+
+const infoRows = [
+  {
+    label: '发行年份',
+    value: `${song.year} 年`,
+    href: `/timeline/${song.year}/`,
+  },
+  { label: '地区', value: song.region },
+  { label: '曲风', value: song.genre ?? '—' },
+  { label: '专辑', value: song.album ? `《${song.album}》` : '单曲 / 未收录' },
+  { label: '精选', value: song.featured ? '是 · FEATURED' : '—' },
+  { label: '曲库编号', value: `TRACK ${catalogNo} / ${String(songs.length).padStart(2, '0')}` },
+];
+---
+
+<BaseLayout title={`${song.title} · ${song.artist}`} description={plainDescription}>
+  <SongDetailHero
+    song={song}
+    catalogNo={catalogNo}
+    total={songs.length}
+    eraLabel={eraLabel}
+    accent={accent}
+    side={side}
+  />
+
+  <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14">
+      <div class="min-w-0">
+        <SectionHeader
+          index="01"
+          eyebrow="About The Song"
+          title="关于这首歌"
+          description={song.story ? '一段时代的注解，加上后来才补上的私人记忆。' : '一首歌的年份、场景，和它留下的那点动静。'}
+          accent="vermilion"
+        />
+
+        <div class="reveal mt-6 max-w-3xl space-y-5 text-[15px] leading-9 text-ink-soft text-pretty" data-reveal>
+          <p>{song.description}</p>
+          {storyParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+
+        {
+          song.lyric && (
+            <blockquote class="reveal mt-10 border-y-[1.5px] border-ink/20 px-2 py-8 text-center" data-reveal>
+              <span class="block font-display text-5xl leading-none text-vermilion/25" aria-hidden="true">
+                “
+              </span>
+              <p class="mt-2 font-display text-[clamp(1.2rem,2.6vw,1.7rem)] leading-9 text-ink sm:leading-10">
+                「{song.lyric}」
+              </p>
+              <footer class="mt-3 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+                歌词节选 · 《{song.title}》 · {song.artist}
+              </footer>
+            </blockquote>
+          )
+        }
+
+        {
+          gallery.length > 0 && (
+            <section class="mt-10" aria-label="图片画廊">
+              <div class="flex items-baseline justify-between gap-3 border-b-[1.5px] border-ink/20 pb-2">
+                <h2 class="font-display text-lg text-ink">图片 · GALLERY</h2>
+                <span class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">{gallery.length} 张</span>
+              </div>
+              <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                {gallery.map((image) => (
+                  <figure class="border-[1.5px] border-ink bg-cream p-2 shadow-print-sm">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      loading="lazy"
+                      decoding="async"
+                      class="aspect-[4/3] w-full object-cover"
+                    />
+                    <figcaption class="mt-2 font-mono text-[9px] leading-5 tracking-[0.1em] text-ink-faint">
+                      {image.title ?? image.alt}
+                      {image.author ? ` · ${image.author}` : ''}
+                      {image.license ? ` · ${image.license}` : ''}
+                      {image.sourceUrl ? (
+                        <>
+                          {' · '}
+                          <a href={image.sourceUrl} class="link-underline text-ink-soft" target="_blank" rel="noopener noreferrer">
+                            来源
+                          </a>
+                        </>
+                      ) : null}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )
+        }
+
+        {yearEvents.length > 0 && <YearEvents year={song.year} events={yearEvents} total={yearEventList.length} />}
+      </div>
+
+      <aside class="min-w-0 lg:sticky lg:top-[4.75rem] lg:self-start">
+        <div class="border-[1.5px] border-ink bg-cream p-5 shadow-print">
+          <div class="flex items-center justify-between gap-3 border-b-[1.5px] border-ink/20 pb-3">
+            <h2 class="font-display text-lg text-ink">唱片档案</h2>
+            <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">RELEASE</span>
+          </div>
+
+          <dl class="mt-1 divide-y divide-dashed divide-ink/15">
+            {
+              infoRows.map((row) => (
+                <div class="flex items-baseline justify-between gap-3 py-2.5">
+                  <dt class="shrink-0 font-mono text-[9px] tracking-[0.2em] text-ink-faint">{row.label}</dt>
+                  <dd class="min-w-0 text-right font-display text-[14px] leading-6 text-ink">
+                    {row.href ? (
+                      <a href={row.href} class="link-underline text-vermilion">
+                        {row.value}
+                      </a>
+                    ) : (
+                      row.value
+                    )}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          <a href={`/timeline/${song.year}/`} class="btn-retro mt-5 w-full justify-center">
+            打开 {song.year} 年 · 时光页
+          </a>
+
+          {song.audio && (
+            <p class="mt-3 font-mono text-[9px] leading-5 tracking-[0.12em] text-ink-faint">
+              本页可试听 · 播放器在页面上方
+            </p>
+          )}
+        </div>
+
+        <div class="mt-4 border-[1.5px] border-ink/20 bg-paper-deep/40 p-4">
+          <p class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">NOTE</p>
+          <p class="mt-2 text-[11.5px] leading-6 text-ink-soft">
+            歌曲年份以专辑发行年份为准；歌词只节选一句，版权归原作者所有。想听更多，回到曲库按年代翻。
+          </p>
+          <a href="/music/" class="link-underline mt-2 inline-block font-mono text-[9px] tracking-[0.16em] text-vermilion">
+            ← 返回曲库
+          </a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {related.length > 0 && <RelatedSongs songs={related} current={song} eraLabel={eraLabel} />}
+
+  <SongNav prev={prev} next={next} />
+
+  <script>
+    import '../../scripts/music';
+  </script>
+</BaseLayout>

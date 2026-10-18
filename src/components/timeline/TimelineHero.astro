@@ -63,8 +63,14 @@ const decadeMarks = years.filter((year) => year % 10 === 0 && year > startYear &
           <span class="stamp text-ink-faint">{coveredYears} 个年份</span>
         </div>
 
-        <p class="mt-4 font-mono text-[10px] tracking-[0.18em] text-ink-faint">
-          按年代 / 地域筛选 · 或点年份条快速跳转
+        <p class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-[0.18em] text-ink-faint">
+          <span>按年代 / 地域筛选</span>
+          <span aria-hidden="true">·</span>
+          <span>或点年份条快速跳转</span>
+          <span aria-hidden="true">·</span>
+          <a href="#year-index" class="link-underline text-ink-soft transition-colors hover:text-vermilion">
+            按年份打开 ↓
+          </a>
         </p>
       </div>
 

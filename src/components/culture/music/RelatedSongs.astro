@@ -1,0 +1,61 @@
+---
+import type { Song } from '../../../types';
+import SectionHeader from '../../shared/SectionHeader.astro';
+import CoverArt from '../../shared/CoverArt.astro';
+
+interface Props {
+  songs: Song[];
+  current: Song;
+  eraLabel: string;
+}
+
+const { songs, current, eraLabel } = Astro.props;
+---
+
+<section class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-20 lg:px-8">
+  <SectionHeader
+    index="02"
+    eyebrow="Related Tracks"
+    title="同年代 · 也值得倒带"
+    description={`和《${current.title}》同年代或同地区，按年份远近挑出来的几首。磁带翻面的时候，顺手也能听见。`}
+    accent="jade"
+  />
+
+  <div class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+    {
+      songs.map((song) => (
+        <a
+          href={`/music/${song.id}/`}
+          class="group relative flex flex-col border-[1.5px] border-ink bg-cream p-2.5 shadow-print-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-print focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion"
+        >
+          <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" image={song.image} />
+          <p class="mt-2.5 font-mono text-[9px] tracking-[0.16em] text-ink-faint">
+            {song.year}
+            <span class="mx-1 text-ink/25">·</span>
+            {song.region}
+            {song.genre && (
+              <>
+                <span class="mx-1 text-ink/25">·</span>
+                {song.genre}
+              </>
+            )}
+          </p>
+          <p class="mt-1 truncate font-display text-[15px] leading-snug text-ink transition-colors group-hover:text-vermilion">
+            {song.title}
+          </p>
+          <p class="truncate text-[12px] text-ink-soft">{song.artist}</p>
+          <span
+            class="mt-2 inline-flex items-center gap-1 font-mono text-[9px] tracking-[0.16em] text-ink-faint transition-colors group-hover:text-vermilion"
+          >
+            查看详情
+            <span aria-hidden="true">→</span>
+          </span>
+        </a>
+      ))
+    }
+  </div>
+
+  <p class="mt-6 font-mono text-[9px] tracking-[0.14em] text-ink-faint">
+    推荐依据：同年代优先，其次同地区、同曲风 · {eraLabel}
+  </p>
+</section>

@@ -1,0 +1,240 @@
+---
+import type { Book, Movie, NostalgiaItem, Song } from '../../types';
+import type { CoverKind } from '../../lib/theme';
+import SectionHeader from '../shared/SectionHeader.astro';
+import YearCultureCard from './YearCultureCard.astro';
+
+interface Props {
+  year: number;
+  songs: Song[];
+  books: Book[];
+  movies: Movie[];
+  toys: NostalgiaItem[];
+}
+
+interface CardData {
+  key: string;
+  kind: CoverKind;
+  href: string;
+  title: string;
+  meta: string;
+  note?: string;
+  year?: number;
+  coverSubtitle?: string;
+  label: string;
+}
+
+interface BlockConfig {
+  id: string;
+  index: string;
+  en: string;
+  heading: string;
+  lead: string;
+  listHref: string;
+  listLabel: string;
+  unit: string;
+  emptyText: string;
+  accentText: string;
+  accentBg: string;
+}
+
+const { year, songs, books, movies, toys } = Astro.props;
+
+const LIMIT = 8;
+
+const featuredFirst = <T extends { featured?: boolean }>(items: T[]): T[] =>
+  [...items].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
+
+const songCards: CardData[] = featuredFirst(songs).map((song) => ({
+  key: `music-${song.id}`,
+  kind: 'music',
+  href: `/music/${song.id}/`,
+  title: song.title,
+  meta: [song.artist, song.year].filter(Boolean).join(' · '),
+  note: song.lyric ? `「${song.lyric}」` : song.genre,
+  year: song.year,
+  coverSubtitle: song.artist,
+  label: '音乐',
+}));
+
+const movieCards: CardData[] = featuredFirst(movies).map((movie) => ({
+  key: `movie-${movie.id}`,
+  kind: 'movie',
+  href: `/movies/${movie.id}/`,
+  title: movie.title,
+  meta: [movie.type, movie.region].filter(Boolean).join(' · '),
+  note: movie.quote ? `「${movie.quote}」` : movie.genre,
+  year: movie.year,
+  coverSubtitle: movie.director ?? movie.region,
+  label: '影视',
+}));
+
+const bookCards: CardData[] = featuredFirst(books).map((book) => ({
+  key: `book-${book.id}`,
+  kind: 'book',
+  href: `/books/${book.id}/`,
+  title: book.title,
+  meta: [book.author, book.category].filter(Boolean).join(' · '),
+  note: book.quote ? `「${book.quote}」` : book.category,
+  year: book.year,
+  coverSubtitle: book.author,
+  label: '书籍',
+}));
+
+const toyCards: CardData[] = featuredFirst(toys).map((toy) => ({
+  key: `toy-${toy.id}`,
+  kind: 'toy',
+  href: `/toys/${toy.id}/`,
+  title: toy.name,
+  meta: `${toy.category} · ${toy.yearStart}–${toy.yearEnd ?? '今'}`,
+  note: toy.description,
+  year: toy.yearStart,
+  coverSubtitle: toy.category,
+  label: '老物件',
+}));
+
+const configs: BlockConfig[] = [
+  {
+    id: 'music',
+    index: '01',
+    en: 'Listen',
+    heading: '那一年，我们听什么',
+    lead: '磁带、随身听、点歌台，和抄在信纸上的歌词。',
+    listHref: '/music/',
+    listLabel: '全部音乐',
+    unit: '首',
+    emptyText: '这一年的金曲还没整理进来',
+    accentText: 'text-jade',
+    accentBg: 'bg-jade',
+  },
+  {
+    id: 'movies',
+    index: '02',
+    en: 'Watch',
+    heading: '那一年，我们看什么',
+    lead: '录像厅的下午场、电视机里的暑假档，和全家围坐的那台机子。',
+    listHref: '/movies/',
+    listLabel: '全部影视',
+    unit: '部',
+    emptyText: '这一年的片子还没整理进来',
+    accentText: 'text-sky',
+    accentBg: 'bg-sky',
+  },
+  {
+    id: 'books',
+    index: '03',
+    en: 'Read',
+    heading: '那一年，我们读什么',
+    lead: '课桌下、被窝里、租书摊上按天算钱的书。',
+    listHref: '/books/',
+    listLabel: '全部书籍',
+    unit: '本',
+    emptyText: '这一年的书单还没整理进来',
+    accentText: 'text-mustard',
+    accentBg: 'bg-mustard',
+  },
+  {
+    id: 'toys',
+    index: '04',
+    en: 'Play',
+    heading: '那一年，我们玩什么',
+    lead: '手上、兜里、抽屉里，那些带温度的小东西。',
+    listHref: '/toys/',
+    listLabel: '全部老物件',
+    unit: '件',
+    emptyText: '这一年的老物件还没整理进来',
+    accentText: 'text-vermilion',
+    accentBg: 'bg-vermilion',
+  },
+];
+
+const cardMap: Record<string, CardData[]> = {
+  music: songCards,
+  movies: movieCards,
+  books: bookCards,
+  toys: toyCards,
+};
+
+const groups = configs.map((config) => {
+  const cards = cardMap[config.id] ?? [];
+  return { config, total: cards.length, cards: cards.slice(0, LIMIT) };
+});
+---
+
+<section id="year-culture" class="relative scroll-mt-24 border-t-[1.5px] border-ink/15 bg-paper-deep/30 py-12 sm:py-16">
+  <div class="pointer-events-none absolute inset-0 opacity-40 line-grid" aria-hidden="true"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <SectionHeader
+      index="02"
+      eyebrow="That Year's Culture"
+      title="那一年，我们听、看、读、玩"
+      description={`${year} 年，磁带、电视机、课桌和抽屉里出现过的东西。点开任意一张，去看它的完整故事。`}
+      accent="jade"
+    />
+
+    <div class="mt-10 space-y-12">
+      {
+        groups.map(({ config, total, cards }) => (
+          <div>
+            <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b-[1.5px] border-ink/60 pb-2.5">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2.5">
+                  <span class:list={['font-mono text-[10px] font-bold tracking-[0.28em]', config.accentText]}>
+                    {config.index} / {config.en.toUpperCase()}
+                  </span>
+                  <span class:list={['h-1.5 w-1.5', config.accentBg]} aria-hidden="true" />
+                  <span class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">
+                    {total > 0 ? `共 ${total} ${config.unit}` : '资料暂缺'}
+                  </span>
+                </div>
+                <h3 class="mt-1.5 font-display text-xl leading-none text-ink sm:text-2xl">{config.heading}</h3>
+                <p class="mt-1.5 text-[12px] leading-6 text-ink-soft">{config.lead}</p>
+              </div>
+              <a
+                href={config.listHref}
+                class="link-underline shrink-0 font-mono text-[10px] tracking-[0.16em] text-ink-soft transition-colors hover:text-vermilion"
+              >
+                {config.listLabel} →
+              </a>
+            </div>
+
+            {cards.length > 0 ? (
+              <ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {cards.map((card) => (
+                  <li>
+                    <YearCultureCard
+                      kind={card.kind}
+                      href={card.href}
+                      title={card.title}
+                      meta={card.meta}
+                      note={card.note}
+                      year={card.year}
+                      coverSubtitle={card.coverSubtitle}
+                      label={card.label}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div class="mt-4 border-[1.5px] border-dashed border-ink/25 bg-cream/50 p-6 text-center">
+                <p class="font-display text-base text-ink">{config.emptyText}。</p>
+                <p class="mt-1.5 text-[12px] leading-6 text-ink-soft">
+                  先去 <a class="link-underline text-vermilion" href={config.listHref}>{config.listLabel}</a> 逛逛吧。
+                </p>
+              </div>
+            )}
+
+            {total > cards.length && (
+              <p class="mt-3 text-right font-mono text-[9px] tracking-[0.14em] text-ink-faint">
+                {config.id === 'toys' ? '这一年流行的' : '还有'} {total - cards.length} {config.unit}，去
+                <a class="link-underline text-ink-soft" href={config.listHref}>全部{config.listLabel.replace('全部', '')}</a>
+                里看
+              </p>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -85,6 +85,21 @@ const pad = (value: number) => String(value).padStart(2, '0');
             )}
           </dl>
 
+          <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <a
+              href={`/movies/${movie.id}/`}
+              class="inline-flex items-center gap-2 border-b border-mustard/50 pb-0.5 font-mono text-[10px] tracking-[0.18em] text-mustard transition-colors hover:border-mustard hover:text-cream"
+            >
+              查看完整影片档案 <span aria-hidden="true">→</span>
+            </a>
+            <a
+              href={`/timeline/${movie.year}/`}
+              class="font-mono text-[10px] tracking-[0.18em] text-cream/40 transition-colors hover:text-cream/70"
+            >
+              打开 {movie.year} 年 →
+            </a>
+          </div>
+
           {movie.themeSong && (
             <div class="mt-4 inline-flex max-w-full items-center gap-3 border-[1.5px] border-cream/25 bg-cream/[0.04] px-3 py-2">
               <span class="flex shrink-0 items-center gap-1" aria-hidden="true">

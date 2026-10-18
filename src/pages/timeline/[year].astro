@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { eventsByYear, eventYearList } from '../../data/events';
+import { eras, site } from '../../data/site';
+import { eraOfYear } from '../../lib/theme';
+import type { Era, EventCategory, TimeEvent } from '../../types';
+import { songs } from '../../data/culture/music';
+import { books } from '../../data/culture/books';
+import { movies } from '../../data/culture/movies';
+import { toys } from '../../data/nostalgia/toys';
+import YearHero from '../../components/timeline/YearHero.astro';
+import YearTimeline from '../../components/timeline/YearTimeline.astro';
+import YearCulture from '../../components/timeline/YearCulture.astro';
+import YearNav from '../../components/timeline/YearNav.astro';
+
+export function getStaticPaths() {
+  return eventYearList.map((year) => ({ params: { year: String(year) } }));
+}
+
+const year = Number(Astro.params.year);
+const events = eventsByYear.get(year) ?? [];
+
+/** 无日期的条目排在后面，按 category 的固定顺序 */
+const CATEGORY_ORDER: EventCategory[] = ['科技', '文化', '娱乐', '体育', '社会', '生活', '政治', '灾难'];
+const categoryIndex = (category: EventCategory): number => {
+  const index = CATEGORY_ORDER.indexOf(category);
+  return index === -1 ? CATEGORY_ORDER.length : index;
+};
+
+const sortedEvents: TimeEvent[] = [...events].sort((a, b) => {
+  const dateA = a.date ?? '';
+  const dateB = b.date ?? '';
+  if (dateA && dateB) return dateA.localeCompare(dateB);
+  if (dateA) return -1;
+  if (dateB) return 1;
+  return categoryIndex(a.category) - categoryIndex(b.category);
+});
+
+const highlight: TimeEvent | undefined =
+  sortedEvents.find((event) => event.highlight) ??
+  sortedEvents.find((event) => event.scope === 'china') ??
+  sortedEvents[0];
+
+const eraId = eraOfYear(year);
+const era: Era = eras.find((item) => item.id === eraId) ?? eras[0];
+const eraIndex = eras.indexOf(era) + 1;
+
+const chinaCount = events.filter((event) => event.scope === 'china').length;
+const globalCount = events.filter((event) => event.scope === 'global').length;
+
+const clip = (text: string, max: number): string => (text.length > max ? `${text.slice(0, max)}…` : text);
+const oneLiner = highlight
+  ? clip((highlight.impact ?? highlight.description).trim(), 110)
+  : '这一年，时光轴上还空着。';
+
+const titleForYear = (target: number): string => {
+  const list = eventsByYear.get(target) ?? [];
+  const top = list.find((event) => event.highlight) ?? list.find((event) => event.scope === 'china') ?? list[0];
+  return top?.title ?? `${target} 年的记忆`;
+};
+
+const currentIndex = eventYearList.indexOf(year);
+const prevYear = currentIndex > 0 ? eventYearList[currentIndex - 1] : undefined;
+const nextYear =
+  currentIndex >= 0 && currentIndex < eventYearList.length - 1 ? eventYearList[currentIndex + 1] : undefined;
+const prev = prevYear ? { year: prevYear, title: titleForYear(prevYear) } : undefined;
+const next = nextYear ? { year: nextYear, title: titleForYear(nextYear) } : undefined;
+
+const yearTicks = Array.from({ length: site.endYear - site.startYear + 1 }, (_, index) => site.startYear + index);
+
+const yearSongs = songs.filter((song) => song.year === year);
+const yearBooks = books.filter((book) => book.year === year);
+const yearMovies = movies.filter((movie) => movie.year === year);
+const yearToys = toys.filter((toy) => toy.yearStart <= year && year <= (toy.yearEnd ?? toy.yearStart));
+
+const description = `${year} 年：${oneLiner}`;
+---
+
+<BaseLayout title={`${year} 年`} description={description}>
+  <YearHero
+    year={year}
+    era={era}
+    eraIndex={eraIndex}
+    eventsCount={events.length}
+    chinaCount={chinaCount}
+    globalCount={globalCount}
+    highlight={highlight}
+    oneLiner={oneLiner}
+    startYear={site.startYear}
+    endYear={site.endYear}
+    yearTicks={yearTicks}
+    prevYear={prevYear}
+    nextYear={nextYear}
+  />
+
+  <YearTimeline year={year} events={sortedEvents} />
+
+  <YearCulture year={year} songs={yearSongs} books={yearBooks} movies={yearMovies} toys={yearToys} />
+
+  <YearNav prev={prev} next={next} />
+</BaseLayout>

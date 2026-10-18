@@ -1,0 +1,478 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeader from '../../components/shared/SectionHeader.astro';
+import Reveal from '../../components/shared/Reveal.astro';
+import CoverArt from '../../components/shared/CoverArt.astro';
+import { books } from '../../data/culture/books';
+import { eventsForYear } from '../../data/events/index';
+import { imagesFor } from '../../data/images';
+import { eraOfYear } from '../../lib/theme';
+import type { Book, ImageCredit } from '../../types';
+
+export function getStaticPaths() {
+  return books.map((book) => ({ params: { id: book.id }, props: { book } }));
+}
+
+interface Props {
+  book: Book;
+}
+
+const { book } = Astro.props;
+
+const total = books.length;
+const ordered = [...books].sort(
+  (a, b) => a.year - b.year || a.title.localeCompare(b.title, 'zh-Hans-CN'),
+);
+const position = ordered.findIndex((item) => item.id === book.id);
+const prevBook = position > 0 ? ordered[position - 1] : undefined;
+const nextBook = position >= 0 && position < ordered.length - 1 ? ordered[position + 1] : undefined;
+
+const era = eraOfYear(book.year);
+const sameEraCount = books.filter((item) => eraOfYear(item.year) === era && item.id !== book.id).length;
+const callNo = `${String(book.year).slice(2)}-${String(position + 1).padStart(2, '0')}`;
+
+const leadSentence = (() => {
+  const stop = book.description.indexOf('。');
+  const first = stop >= 0 ? book.description.slice(0, stop + 1) : book.description;
+  return first.length > 88 ? `${first.slice(0, 86)}……` : first;
+})();
+
+const storyParagraphs = (book.story ?? '')
+  .split(/\n{2,}/)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
+const useDropCap = /[\u3400-\u9fff]/.test(storyParagraphs[0]?.charAt(0) ?? '');
+
+const gallery: ImageCredit[] = Array.from(
+  new Map(
+    [...(book.gallery ?? []), ...imagesFor(book.id)].map((image) => [image.src, image] as const),
+  ).values(),
+);
+
+const yearEvents = eventsForYear(book.year).slice(0, 4);
+
+const related = books
+  .filter((item) => item.id !== book.id)
+  .map((item) => ({
+    book: item,
+    score:
+      (item.category === book.category ? 4 : 0) +
+      (item.country === book.country ? 2 : 0) +
+      (eraOfYear(item.year) === era ? 1 : 0) -
+      Math.min(3, Math.abs(item.year - book.year) / 10),
+  }))
+  .sort((a, b) => b.score - a.score || a.book.year - b.book.year)
+  .slice(0, 4)
+  .map((entry) => entry.book);
+
+const metaDescription = `${book.title}（${book.year}，${book.author} 著，${book.country} · ${book.category}）：${book.description.slice(0, 90)}`;
+---
+
+<BaseLayout title={`${book.title} · ${book.author}`} description={metaDescription}>
+  <!-- ============================ Hero：摊开的借书卡 ============================ -->
+  <section class="relative overflow-hidden border-b-[1.5px] border-ink bg-paper-deep">
+    <div class="pointer-events-none absolute inset-0 opacity-[0.35] line-grid" aria-hidden="true"></div>
+    <div
+      class="pointer-events-none absolute -left-10 -top-10 select-none font-display text-[16rem] leading-none text-ink/[0.04]"
+      aria-hidden="true"
+    >
+      借
+    </div>
+
+    <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-6 sm:pb-16 sm:pt-10 lg:px-8">
+      <nav class="font-mono text-[10px] tracking-[0.18em] text-ink-faint" aria-label="面包屑">
+        <a href="/" class="transition-colors hover:text-ink">首页</a>
+        <span class="mx-2 text-ink/30" aria-hidden="true">/</span>
+        <a href="/books/" class="transition-colors hover:text-ink">书籍</a>
+        <span class="mx-2 text-ink/30" aria-hidden="true">/</span>
+        <span class="text-ink-soft">借书卡</span>
+      </nav>
+
+      <div class="mt-8 grid items-center gap-12 lg:grid-cols-[0.82fr_1.18fr]">
+        <Reveal direction="scale" class="relative">
+          <div class="mx-auto w-full max-w-[320px]">
+            <div class="relative pb-2">
+              <!-- 压在下面的两张借书卡 -->
+              <span class="absolute -left-3 -top-3 h-full w-full -rotate-2 border-[1.5px] border-ink/25 bg-cream/60" aria-hidden="true"></span>
+              <span class="absolute -right-2 top-2 h-full w-full rotate-1 border-[1.5px] border-ink/20 bg-cream/40" aria-hidden="true"></span>
+
+              <div class="relative z-10 border-[1.5px] border-ink bg-cream p-2 shadow-print">
+              <CoverArt
+                title={book.title}
+                year={book.year}
+                kind="book"
+                label="BOOK"
+                seed={`detail-${book.id}`}
+                image={book.image}
+              />
+              <span
+                class="pointer-events-none absolute -right-2 top-4 z-20 -rotate-2 border-[1.5px] border-ink bg-cream px-1.5 py-0.5 font-mono text-[8px] tracking-[0.12em] text-ink shadow-print-sm"
+              >
+                {callNo}
+              </span>
+              {
+                book.featured && (
+                  <span class="pointer-events-none absolute -left-2 top-3 z-20 -rotate-3 border-[1.5px] border-vermilion bg-vermilion px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.18em] text-cream">
+                    推荐
+                  </span>
+                )
+              }
+            </div>
+
+            </div>
+
+            <p class="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.22em] text-ink-faint">
+              Open Stacks · {book.year} · {book.country}
+            </p>
+          </div>
+        </Reveal>
+
+        <div>
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="font-mono text-[11px] font-bold tracking-[0.3em] text-mustard">
+              BOOK {String(position + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+            </span>
+            <span class="h-px w-10 bg-ink/30" aria-hidden="true"></span>
+            <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-faint">Borrower's Card</span>
+          </div>
+
+          <h1 class="mt-4 font-display text-[clamp(2.4rem,6vw,4.2rem)] leading-[1.05] tracking-tight text-ink">
+            {book.title}
+          </h1>
+          <p class="mt-3 font-display text-xl text-ink-soft sm:text-2xl">{book.author}</p>
+
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <span class="stamp text-vermilion">{book.year}</span>
+            <span class="stamp text-jade">{book.country}</span>
+            <span class="stamp text-ink-soft">{book.category}</span>
+            {book.featured && <span class="stamp text-mustard">推荐</span>}
+            <span class="font-mono text-[9px] tracking-[0.14em] text-ink-faint">馆藏编号 {callNo}</span>
+          </div>
+
+          {leadSentence && (
+            <p class="mt-6 max-w-xl border-l-2 border-vermilion pl-4 font-display text-lg italic leading-8 text-ink-soft">
+              {leadSentence}
+            </p>
+          )}
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/books/" class="btn-retro">← 返回书库</a>
+            <a href={`/timeline/${book.year}/`} class="btn-retro btn-retro-solid">翻开 {book.year} 年 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 正文 ============================ -->
+  <section class="relative py-14 sm:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-12 lg:grid-cols-[1.45fr_0.55fr]">
+        <div>
+          <Reveal>
+            <p class="label-mono text-vermilion">内容提要 · Synopsis</p>
+            <p class="mt-4 max-w-2xl text-[16px] leading-9 text-ink-soft text-pretty">{book.description}</p>
+          </Reveal>
+
+          {
+            book.quote && (
+              <Reveal delay={60}>
+                <figure
+                  class="relative mt-10 overflow-hidden border-[1.5px] border-ink bg-cream px-6 py-7 shadow-print sm:px-10"
+                  style="background-image:repeating-linear-gradient(rgba(34,28,22,0.07) 0 1px, transparent 1px 36px)"
+                >
+                  <div class="pointer-events-none absolute -right-2 -top-4 select-none font-display text-8xl leading-none text-vermilion/10" aria-hidden="true">
+                    “
+                  </div>
+                  <p class="label-mono relative text-vermilion">摘抄 · Excerpt</p>
+                  <blockquote class="relative mt-4 font-display text-[clamp(1.3rem,2.6vw,1.8rem)] italic leading-[1.7] text-ink">
+                    「{book.quote}」
+                  </blockquote>
+                  <figcaption class="relative mt-4 text-right font-mono text-[10px] tracking-[0.16em] text-ink-faint">
+                    —— 《{book.title}》
+                  </figcaption>
+                </figure>
+              </Reveal>
+            )
+          }
+
+          {
+            storyParagraphs.length > 0 && (
+              <Reveal delay={80}>
+                <div class="mt-12">
+                  <p class="label-mono text-jade">阅读记忆 · Reading Notes</p>
+                  <div class="mt-4 max-w-2xl space-y-5">
+                    {storyParagraphs.map((paragraph, index) => (
+                      <p
+                        class:list={[
+                          'text-[15px] leading-9 text-ink-soft text-pretty',
+                          index === 0 &&
+                            useDropCap &&
+                            'first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[3.2rem] first-letter:leading-[0.85] first-letter:text-vermilion',
+                        ]}
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            )
+          }
+
+          {
+            gallery.length > 0 && (
+              <Reveal delay={90}>
+                <div class="mt-12">
+                  <p class="label-mono text-vermilion">图片 · Gallery</p>
+                  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    {gallery.map((image) => (
+                      <figure class="border-[1.5px] border-ink bg-cream p-2 shadow-print-sm">
+                        <img
+                          src={image.src}
+                          alt={image.alt}
+                          loading="lazy"
+                          decoding="async"
+                          class="aspect-[4/3] w-full object-cover"
+                        />
+                        <figcaption class="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 font-mono text-[9px] leading-5 text-ink-faint">
+                          <span class="line-clamp-1">{image.title ?? image.alt}</span>
+                          <span>{image.author ?? '佚名'}{image.license ? ` · ${image.license}` : ''}</span>
+                        </figcaption>
+                        {image.sourceUrl && (
+                          <a
+                            href={image.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-1 inline-block font-mono text-[9px] text-vermilion underline decoration-vermilion/40 underline-offset-2"
+                          >
+                            查看来源
+                          </a>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            )
+          }
+        </div>
+
+        <!-- 侧栏：借阅档案 -->
+        <aside class="lg:pt-2">
+          <div class="space-y-6 lg:sticky lg:top-24">
+            <Reveal>
+              <div class="border-[1.5px] border-ink bg-cream p-5 shadow-print">
+                <div class="flex items-center justify-between border-b border-ink/15 pb-3">
+                  <p class="label-mono text-vermilion">借阅档案</p>
+                  <span class="font-mono text-[9px] tracking-[0.1em] text-ink-faint">NO. {callNo}</span>
+                </div>
+                <dl class="mt-4 space-y-3 text-sm">
+                  <div class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-2">
+                    <dt class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">作者</dt>
+                    <dd class="text-right text-ink">{book.author}</dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-2">
+                    <dt class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">年份</dt>
+                    <dd class="text-right font-mono text-ink">{book.year}</dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-2">
+                    <dt class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">国家</dt>
+                    <dd class="text-right text-ink">{book.country}</dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-2">
+                    <dt class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">类别</dt>
+                    <dd class="text-right text-ink">{book.category}</dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-3">
+                    <dt class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">年代</dt>
+                    <dd class="text-right font-mono text-ink">{era}</dd>
+                  </div>
+                </dl>
+                <div class="mt-5 border-t border-ink/15 pt-4">
+                  <p class="font-mono text-[8px] tracking-[0.2em] text-ink-faint">借阅记录 · DATE DUE</p>
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    <span class="stamp text-vermilion">1987.03.12</span>
+                    <span class="stamp text-jade">1993.06.01</span>
+                    <span class="stamp text-mustard">2001.09.15</span>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={60}>
+              <div class="border-[1.5px] border-ink bg-paper-deep/60 p-5">
+                <p class="label-mono text-jade">借阅须知</p>
+                <ul class="mt-3 space-y-2 text-[12px] leading-6 text-ink-soft">
+                  <li class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-1.5">
+                    <span>借期</span>
+                    <span class="font-mono text-ink">30 天</span>
+                  </li>
+                  <li class="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-1.5">
+                    <span>逾期</span>
+                    <span class="font-mono text-ink">每天 2 分</span>
+                  </li>
+                  <li class="leading-6">折角请压平，批注请用铅笔。同年代的书架上，还有 {sameEraCount} 本等着被翻开。</li>
+                </ul>
+                <a
+                  href="/books/"
+                  class="mt-4 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.16em] text-vermilion transition-colors hover:text-ink"
+                >
+                  继续逛书库 <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 那一年 ============================ -->
+  <section class="border-y-[1.5px] border-ink bg-paper-deep/60 py-14 sm:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeader
+          index={String(book.year)}
+          eyebrow="That Year"
+          title={`那一年，${book.year}`}
+          description={yearEvents.length > 0 ? '这本书出版的年份里，还发生过这些事。' : '这一年还没有留下太多记录，去完整时光轴看看。'}
+          accent="vermilion"
+        />
+        <Reveal class="shrink-0">
+          <a href={`/timeline/${book.year}/`} class="btn-retro">打开 {book.year} 年 →</a>
+        </Reveal>
+      </div>
+
+      {
+        yearEvents.length > 0 ? (
+          <div class="mt-8 grid gap-4 sm:grid-cols-2">
+            {yearEvents.map((event, index) => (
+              <Reveal delay={index * 60}>
+                <article class="h-full border-[1.5px] border-ink bg-cream p-4 shadow-print-sm">
+                  <div class="flex flex-wrap items-center gap-2 font-mono text-[9px] tracking-[0.16em]">
+                    <span
+                      class:list={['inline-block h-2 w-2 rounded-full', event.scope === 'china' ? 'bg-vermilion' : 'bg-sky']}
+                      aria-hidden="true"
+                    />
+                    <span class="text-ink-faint">{event.scope === 'china' ? '中国' : '世界'}</span>
+                    <span class="text-ink/25" aria-hidden="true">/</span>
+                    <span class="text-jade">{event.category}</span>
+                    {event.highlight && <span class="stamp ml-auto text-vermilion">年度大事件</span>}
+                  </div>
+                  <h3 class="mt-2 font-display text-lg leading-snug text-ink">{event.title}</h3>
+                  <p class="mt-2 line-clamp-3 text-[13px] leading-6 text-ink-soft">{event.description}</p>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <div class="mt-8 border-[1.5px] border-dashed border-ink/30 bg-cream/50 px-6 py-10 text-center">
+            <p class="font-display text-xl text-ink-soft">这一年的档案还在整理</p>
+            <p class="mx-auto mt-2 max-w-md text-sm leading-7 text-ink-faint">先去完整时光轴，按年份翻一翻。</p>
+            <a href="/timeline/" class="btn-retro mt-5">去时光轴 →</a>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ============================ 同架推荐 ============================ -->
+  {
+    related.length > 0 && (
+      <section class="py-14 sm:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        index="SHELF"
+        eyebrow="More from the Shelf"
+        title="同架推荐"
+        description="同一个年代、相近的类别，顺手再抽几本。"
+        accent="mustard"
+      />
+
+      <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+        {
+          related.map((item, index) => (
+            <Reveal delay={index * 60}>
+              <a
+                href={`/books/${item.id}/`}
+                class="group flex h-full flex-col border-[1.5px] border-ink bg-cream p-2.5 shadow-print-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-print"
+              >
+                <CoverArt
+                  title={item.title}
+                  year={item.year}
+                  kind="book"
+                  label="BOOK"
+                  seed={`related-${item.id}`}
+                />
+                <p class="mt-3 line-clamp-1 font-display text-[15px] text-ink transition-colors group-hover:text-vermilion">
+                  {item.title}
+                </p>
+                <p class="mt-0.5 font-mono text-[9px] tracking-[0.1em] text-ink-faint">{item.author}</p>
+                <p class="mt-auto pt-2 font-mono text-[9px] tracking-[0.1em] text-ink-faint">
+                  {item.category} · {item.year}
+                </p>
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+      </section>
+    )
+  }
+
+  <!-- ============================ 上一本 / 下一本 ============================ -->
+  <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+    <div class="grid gap-3 sm:grid-cols-2">
+      {
+        prevBook ? (
+          <a
+            href={`/books/${prevBook.id}/`}
+            class="group flex items-center gap-4 border-[1.5px] border-ink bg-cream p-4 shadow-print-sm transition-transform hover:-translate-y-0.5"
+          >
+            <span class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-ink-faint">← 上一本</span>
+            <span class="ml-auto min-w-0 text-right">
+              <span class="block truncate font-display text-base text-ink transition-colors group-hover:text-vermilion">
+                {prevBook.title}
+              </span>
+              <span class="mt-0.5 block font-mono text-[9px] text-ink-faint">
+                {prevBook.author} · {prevBook.year}
+              </span>
+            </span>
+          </a>
+        ) : (
+          <div class="flex items-center gap-3 border border-dashed border-ink/25 p-4 font-mono text-[10px] tracking-[0.14em] text-ink-faint">
+            ← 已经是第一本
+          </div>
+        )
+      }
+      {
+        nextBook ? (
+          <a
+            href={`/books/${nextBook.id}/`}
+            class="group flex flex-row-reverse items-center gap-4 border-[1.5px] border-ink bg-cream p-4 text-right shadow-print-sm transition-transform hover:-translate-y-0.5"
+          >
+            <span class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-ink-faint">下一本 →</span>
+            <span class="mr-auto min-w-0 text-left">
+              <span class="block truncate font-display text-base text-ink transition-colors group-hover:text-vermilion">
+                {nextBook.title}
+              </span>
+              <span class="mt-0.5 block font-mono text-[9px] text-ink-faint">
+                {nextBook.author} · {nextBook.year}
+              </span>
+            </span>
+          </a>
+        ) : (
+          <div class="flex flex-row-reverse items-center gap-3 border border-dashed border-ink/25 p-4 text-right font-mono text-[10px] tracking-[0.14em] text-ink-faint">
+            已经是最后一本 →
+          </div>
+        )
+      }
+    </div>
+
+    <div class="mt-10 text-center">
+      <a href="/books/" class="btn-retro">← 回到开架书库</a>
+    </div>
+  </section>
+</BaseLayout>
