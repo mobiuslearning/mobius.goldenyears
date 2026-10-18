@@ -1,0 +1,664 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CoverArt from '../components/shared/CoverArt.astro';
+import Reveal from '../components/shared/Reveal.astro';
+import SectionHeader from '../components/shared/SectionHeader.astro';
+import { site, eras, sections } from '../data/site';
+import { songs } from '../data/culture/music';
+import { books } from '../data/culture/books';
+import { movies } from '../data/culture/movies';
+import { toys } from '../data/nostalgia/toys';
+import { allEvents, eventStats } from '../data/events';
+
+function pick<T extends { featured?: boolean }>(items: T[], count: number): T[] {
+  const featured = items.filter((item) => item.featured);
+  return [...featured, ...items.filter((item) => !item.featured)].slice(0, count);
+}
+
+const featuredSongs = pick(songs, 4);
+const featuredMovies = pick(movies, 3);
+const featuredBooks = pick(books, 4);
+const featuredToys = pick(toys, 3);
+
+const years = Array.from({ length: site.endYear - site.startYear + 1 }, (_, index) => site.startYear + index);
+const marqueeYears = [...years, ...years];
+
+const memoryPool = [
+  ...pick(songs, 6).map((song) => ({
+    kind: '一首歌',
+    title: song.title,
+    meta: `${song.artist} · ${song.year}`,
+    text: song.lyric ? `「${song.lyric}」` : song.description,
+  })),
+  ...pick(movies, 5).map((movie) => ({
+    kind: '一部影视',
+    title: movie.title,
+    meta: `${movie.year} · ${movie.type}`,
+    text: movie.quote ? `「${movie.quote}」` : movie.description,
+  })),
+  ...pick(books, 5).map((book) => ({
+    kind: '一本书',
+    title: book.title,
+    meta: `${book.author} · ${book.year}`,
+    text: book.quote ? `「${book.quote}」` : book.description,
+  })),
+  ...pick(toys, 5).map((toy) => ({
+    kind: '一件老物件',
+    title: toy.name,
+    meta: `${toy.yearStart} 年前后 · ${toy.category}`,
+    text: toy.memory ?? toy.description,
+  })),
+  ...allEvents
+    .filter((_, index) => index % Math.max(1, Math.floor(allEvents.length / 6)) === 0)
+    .slice(0, 6)
+    .map((event) => ({
+      kind: '那一年',
+      title: event.title,
+      meta: `${event.year} · ${event.scope === 'china' ? '中国' : '世界'}`,
+      text: event.description,
+    })),
+];
+const memoryJson = JSON.stringify(memoryPool).replace(/</g, '\\u003c');
+
+// 确定性星空（WebGL 不可用时的兜底）
+let starSeed = 19900818;
+const rand = () => {
+  starSeed = (starSeed * 1664525 + 1013904223) % 4294967296;
+  return starSeed / 4294967296;
+};
+const stars = Array.from({ length: 110 }, () => ({
+  x: Number((rand() * 100).toFixed(2)),
+  y: Number((rand() * 100).toFixed(2)),
+  r: Number((rand() * 1.25 + 0.35).toFixed(2)),
+  o: Number((rand() * 0.6 + 0.2).toFixed(2)),
+  gold: rand() > 0.72,
+}));
+
+const stats = [
+  { value: '30', unit: '年', label: '1980 — 2009' },
+  { value: String(eventStats.total), unit: '件', label: '大事记' },
+  { value: String(songs.length), unit: '首', label: '华语金曲' },
+  { value: String(toys.length), unit: '件', label: '老物件' },
+];
+---
+
+<BaseLayout>
+  <!-- ============================== HERO ============================== -->
+  <section class="relative isolate flex min-h-[88svh] flex-col overflow-hidden bg-night text-cream">
+    <canvas data-hero-canvas class="absolute inset-0 z-0 h-full w-full" aria-hidden="true"></canvas>
+    <svg class="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
+      {stars.map((star) => (
+        <circle cx={`${star.x}%`} cy={`${star.y}%`} r={star.r} fill={star.gold ? '#d19c37' : '#f4ecdc'} opacity={star.o} />
+      ))}
+    </svg>
+    <div
+      class="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_28%_18%,rgba(209,156,55,0.2),transparent_55%),radial-gradient(ellipse_at_80%_85%,rgba(194,59,42,0.16),transparent_50%)]"
+    >
+    </div>
+    <div class="grain pointer-events-none absolute inset-0 z-[2] opacity-40"></div>
+    <div class="scanlines pointer-events-none absolute inset-0 z-[2] opacity-70"></div>
+
+    <div
+      class="relative z-10 mx-auto grid w-full max-w-7xl flex-1 items-center gap-14 px-4 pb-16 pt-16 sm:px-6 sm:pt-20 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8 lg:px-8 lg:pb-20 lg:pt-24"
+    >
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="label-mono text-mustard">Side A · 1980—2009</span>
+          <span class="h-px w-8 bg-cream/25"></span>
+          <span class="label-mono text-cream/45">按下播放键</span>
+          <span class="stamp ml-auto hidden border-vermilion text-vermilion sm:inline-flex">REC ●</span>
+        </div>
+
+        <h1 class="mt-7 font-display leading-[0.9] tracking-tight">
+          <span class="block text-[clamp(3.6rem,10.5vw,8rem)]">流金岁月</span>
+          <span class="mt-3 flex flex-wrap items-end gap-x-5 gap-y-3">
+            <span class="text-stroke-cream text-[clamp(3.6rem,10.5vw,8rem)] leading-none">时光机</span>
+            <span class="mb-2 hidden font-mono text-[10px] leading-5 tracking-[0.24em] text-cream/45 sm:block">
+              THE GOLDEN<br />YEARS TIME MACHINE
+            </span>
+          </span>
+        </h1>
+
+        <p class="mt-8 max-w-2xl text-[15px] leading-8 text-cream/70 sm:text-base">
+          卡带、录像厅、小霸王、万能充电器，还有每年守在电视机前的那几个小时——
+          这里收藏着 80 后、90 后共同经历过的世界。把年份拨回去，让记忆重新转起来。
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a href="/timeline/" class="btn-retro btn-retro-solid group gap-2.5 border-cream bg-cream text-ink hover:border-mustard hover:bg-mustard">
+            进入时光轴
+            <svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="square" />
+            </svg>
+          </a>
+          <a href="/time-machine/" class="btn-retro border-cream/60 bg-transparent text-cream hover:border-cream hover:bg-cream hover:text-ink">
+            启动时光机
+          </a>
+        </div>
+
+        <dl class="mt-12 grid max-w-xl grid-cols-2 gap-px border border-cream/15 bg-cream/15 sm:grid-cols-4">
+          {
+            stats.map((stat) => (
+              <div class="bg-night/90 px-4 py-4 backdrop-blur-sm">
+                <dt class="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40">{stat.label}</dt>
+                <dd class="mt-2 flex items-baseline gap-1">
+                  <span class="font-display text-2xl leading-none text-mustard">{stat.value}</span>
+                  <span class="font-mono text-[10px] text-cream/50">{stat.unit}</span>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <!-- 黑胶唱机 -->
+      <div class="relative mx-auto hidden w-full max-w-[27rem] lg:block">
+        <div class="vinyl-grooves animate-spin-slow relative aspect-square rounded-full border-[3px] border-cream/15 shadow-[0_0_90px_rgba(209,156,55,0.18)]">
+          <div class="absolute inset-[32%] flex flex-col items-center justify-center rounded-full border border-cream/30 bg-vermilion text-center">
+            <span class="font-mono text-[8px] tracking-[0.3em] text-cream/70">SIDE A</span>
+            <span class="mt-1 font-display text-4xl leading-none text-cream">1996</span>
+            <span class="mt-1 font-mono text-[7px] tracking-[0.28em] text-cream/60">33⅓ RPM</span>
+          </div>
+          <span class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-night ring-1 ring-cream/30"></span>
+        </div>
+        <div class="absolute -right-3 top-3 h-[58%] w-[2px] origin-top rotate-[26deg] bg-gradient-to-b from-cream/50 to-cream/10" aria-hidden="true">
+          <span class="absolute -bottom-2 -left-1 h-3 w-3 rotate-45 border border-cream/40 bg-night"></span>
+        </div>
+
+        <div class="absolute -bottom-6 -left-8 w-56 -rotate-3 border-[1.5px] border-cream/25 bg-night-soft/90 p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.35)] backdrop-blur-sm">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-16 items-center justify-between rounded-[3px] border border-cream/25 bg-cream/5 px-2">
+              <span class="h-4 w-4 rounded-full border border-cream/40"></span>
+              <span class="h-4 w-4 rounded-full border border-cream/40"></span>
+            </div>
+            <div class="min-w-0">
+              <p class="font-mono text-[8px] tracking-[0.26em] text-mustard">MIXTAPE</p>
+              <p class="truncate font-display text-sm text-cream">给 8090 后的一盘带子</p>
+              <p class="font-mono text-[8px] tracking-[0.18em] text-cream/40">SIDE A · 60 MIN</p>
+            </div>
+          </div>
+        </div>
+
+        <span class="absolute -right-4 bottom-10 rotate-6 border-[1.5px] border-mustard px-2 py-1 font-mono text-[9px] tracking-[0.2em] text-mustard">
+          PRESS PLAY ▶
+        </span>
+      </div>
+    </div>
+
+    <!-- 年份走马灯 -->
+    <div class="relative z-10 overflow-hidden border-t border-cream/15 bg-night-soft/80 py-3">
+      <div class="marquee-track items-center gap-0">
+        {
+          [0, 1].map(() => (
+            <div class="flex shrink-0 items-center">
+              {marqueeYears.map((year) => (
+                <span class="flex items-center">
+                  <span class="px-4 font-mono text-[11px] tracking-[0.22em] text-cream/40">{year}</span>
+                  <span class="h-1 w-1 rounded-full bg-mustard/50"></span>
+                </span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 开场白 ============================== -->
+  <section class="relative bg-paper-texture py-20 sm:py-28">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:px-8">
+      <Reveal>
+        <p class="label-mono text-vermilion">Editor's Note · 开场白</p>
+        <h2 class="mt-4 font-display text-[clamp(1.9rem,4vw,3rem)] leading-[1.25] tracking-tight text-ink">
+          把记忆，<br />重新装进一盘磁带。
+        </h2>
+        <div class="mt-6 space-y-4 text-[15px] leading-8 text-ink-soft">
+          <p>
+            我们这代人的童年，是从一盘翻录了很多遍的磁带开始的。A 面听完了翻 B 面，随身听的电池盖松了，用胶带缠两圈还能用。
+          </p>
+          <p>
+            后来有了录像厅、DVD、网吧和 MP3。再后来，什么都变得很快，快到我们来不及记住一个频道号、一盘带子的曲目顺序。
+          </p>
+          <p class="text-ink">
+            所以有了这台时光机。它不是要回到过去，只是想让那些具体的、发着光的小事，有个地方可以重新播放。
+          </p>
+        </div>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <span class="stamp border-jade text-jade">一个 90 后的私人档案</span>
+          <span class="stamp text-ink-faint">1980 — 2009</span>
+        </div>
+      </Reveal>
+
+      <Reveal delay={120} class="relative">
+        <div class="paper-card relative p-8 sm:p-10">
+          <span class="absolute -top-3 left-8 h-6 w-24 bg-mustard/40"></span>
+          <p class="font-mono text-[10px] tracking-[0.3em] text-ink-faint">摘自某一页练习本</p>
+          <blockquote class="mt-6 font-display text-[clamp(1.35rem,2.6vw,1.9rem)] leading-[1.7] text-ink">
+            「一盘磁带、一本借来的书、一集没看完的电视剧，就能撑起一整个暑假。」
+          </blockquote>
+          <div class="mt-8 flex items-end justify-between gap-4 border-t border-ink/15 pt-5">
+            <div>
+              <p class="font-mono text-[10px] tracking-[0.2em] text-ink-faint">—— 写给那时候的我们</p>
+              <p class="mt-2 text-xs text-ink-faint">时间过去了，但播放键还在。</p>
+            </div>
+            <span class="grid h-14 w-14 rotate-6 place-items-center rounded-full border-[1.5px] border-vermilion text-center font-display text-[10px] leading-4 text-vermilion">
+              流金<br />岁月
+            </span>
+          </div>
+          <div class="pointer-events-none absolute inset-0 dot-grid opacity-[0.35]"></div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2 font-mono text-[10px] tracking-[0.16em] text-ink-faint">
+          <span class="border border-ink/15 bg-cream/60 px-2 py-1">磁带</span>
+          <span class="border border-ink/15 bg-cream/60 px-2 py-1">录像厅</span>
+          <span class="border border-ink/15 bg-cream/60 px-2 py-1">小霸王</span>
+          <span class="border border-ink/15 bg-cream/60 px-2 py-1">万能充</span>
+          <span class="border border-ink/15 bg-cream/60 px-2 py-1">QQ 空间</span>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- ============================== 六大板块 ============================== -->
+  <section class="border-y border-ink/10 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <SectionHeader index="01—06" eyebrow="Contents · 目录" title="这台机器里，装了六样东西" description="音乐、书、影视、大事件、老物件，以及一个可以输入出生年份的时光机。挑一个熟悉的入口，往下走。" />
+      </Reveal>
+
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          sections.map((section, index) => (
+            <Reveal delay={index * 60}>
+              <a href={section.href} class="paper-card paper-card-hover group relative flex h-full flex-col overflow-hidden p-6 sm:p-7">
+                <span class="pointer-events-none absolute -right-3 -top-6 select-none font-display text-[7rem] leading-none text-ink/[0.045] transition-colors group-hover:text-vermilion/10">
+                  {section.index}
+                </span>
+                <span class="label-mono text-ink-faint">{section.index}</span>
+                <span class="mt-6 font-display text-3xl tracking-wide text-ink transition-colors group-hover:text-vermilion">
+                  {section.title}
+                </span>
+                <span class="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-faint">{section.en}</span>
+                <p class="mt-4 text-sm leading-7 text-ink-soft">{section.description}</p>
+                <span class="mt-auto flex items-center gap-2 pt-8 font-mono text-[11px] tracking-[0.18em] text-ink group-hover:text-vermilion">
+                  进去看看
+                  <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="square" />
+                  </svg>
+                </span>
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 三个年代 ============================== -->
+  <section class="py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <Reveal>
+          <SectionHeader index="Era" eyebrow="Three Decades" title="三个年代，三种背景音" description="每个十年都有自己的颜色、声音和烦恼。你属于哪一段？" />
+        </Reveal>
+        <Reveal delay={100}>
+          <a href="/timeline/" class="btn-retro shrink-0">查看完整时光轴</a>
+        </Reveal>
+      </div>
+
+      <div class="mt-12 grid gap-4 md:grid-cols-3">
+        {
+          eras.map((era, index) => (
+            <Reveal delay={index * 80}>
+              <a
+                href={`/timeline/#${era.id}`}
+                class:list={[
+                  'group relative flex h-full flex-col justify-between overflow-hidden border-[1.5px] border-ink p-7 shadow-print',
+                  era.color === 'mustard' ? 'text-ink' : 'text-cream',
+                ]}
+              >
+                <div
+                  class:list={[
+                    'absolute inset-0 transition-transform duration-700 group-hover:scale-105',
+                    era.color === 'vermilion' && 'bg-vermilion',
+                    era.color === 'jade' && 'bg-jade',
+                    era.color === 'mustard' && 'bg-mustard',
+                  ]}
+                >
+                </div>
+                <div class="grain pointer-events-none absolute inset-0 opacity-25"></div>
+                <div class="scanlines pointer-events-none absolute inset-0 opacity-30"></div>
+                <div class="relative">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono text-[11px] tracking-[0.24em] text-cream/70">{era.years}</span>
+                    <span class="stamp border-cream/50 text-cream/80">{era.label}</span>
+                  </div>
+                  <h3 class="mt-10 font-display text-[clamp(1.8rem,3vw,2.4rem)] leading-tight">{era.name}</h3>
+                  <p class="mt-4 max-w-xs text-sm leading-7 text-cream/80">{era.mood}</p>
+                </div>
+                <div class:list={['relative mt-10 flex items-center justify-between border-t pt-4', era.color === 'mustard' ? 'border-ink/25' : 'border-cream/25']}>
+                  <span class="font-mono text-[10px] tracking-[0.2em] text-cream/60">进入这个十年</span>
+                  <svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="square" />
+                  </svg>
+                </div>
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 精选音乐 ============================== -->
+  <section class="relative overflow-hidden border-y border-ink/10 bg-paper-deep py-20 sm:py-24">
+    <div class="pointer-events-none absolute -right-24 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full border border-ink/10"></div>
+    <div class="pointer-events-none absolute -right-12 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-ink/10"></div>
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <Reveal>
+          <SectionHeader index="Music" eyebrow="Side A / Side B" title="循环播放过一百遍的歌" description="从崔健的第一声呐喊，到 MP3 里周杰伦的前奏。哪一首，是你的开机音乐？" accent="jade" />
+        </Reveal>
+        <Reveal delay={100}>
+          <a href="/music/" class="btn-retro shrink-0">打开磁带架</a>
+        </Reveal>
+      </div>
+
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          featuredSongs.map((song, index) => (
+            <Reveal delay={index * 70}>
+              <a href="/music/" class="paper-card paper-card-hover group flex h-full flex-col p-3">
+                <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" seed={song.id} />
+                <div class="flex flex-1 flex-col px-1 pb-1 pt-4">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="label-mono text-vermilion">{song.year}</span>
+                    <span class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">{song.region}</span>
+                  </div>
+                  <h3 class="mt-2 font-display text-xl leading-tight text-ink group-hover:text-vermilion">{song.title}</h3>
+                  <p class="mt-1 text-xs text-ink-soft">{song.artist}</p>
+                  {song.lyric && <p class="mt-3 border-l-2 border-jade/40 pl-3 text-[13px] leading-6 text-ink-faint">「{song.lyric}」</p>}
+                </div>
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 影视 & 书籍 ============================== -->
+  <section class="py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <SectionHeader index="Screens & Pages" eyebrow="Private Collection" title="录像厅散场了，书还在抽屉里" description="一边是全家围坐的电视机，一边是课桌底下偷偷翻的书。它们一起构成了我们认识世界的方式。" accent="mustard" />
+      </Reveal>
+
+      <div class="mt-12 grid gap-5 lg:grid-cols-2">
+        <!-- 影视 -->
+        <Reveal class="min-w-0">
+          <div class="relative flex h-full flex-col overflow-hidden border-[1.5px] border-ink bg-night p-6 text-cream shadow-print sm:p-8">
+            <div class="scanlines pointer-events-none absolute inset-0 opacity-40"></div>
+            <div class="relative flex items-center justify-between">
+              <div>
+                <p class="label-mono text-mustard">Now Showing · 录像厅</p>
+                <h3 class="mt-2 font-display text-3xl">今晚放什么</h3>
+              </div>
+              <a href="/movies/" class="font-mono text-[10px] tracking-[0.18em] text-cream/60 transition-colors hover:text-mustard">
+                全部影视 →
+              </a>
+            </div>
+            <div class="relative mt-7 grid grid-cols-3 gap-3">
+              {
+                featuredMovies.map((movie, index) => (
+                  <a href="/movies/" class="group/poster block" style={`transform: rotate(${index === 1 ? '1.5deg' : index === 2 ? '-1deg' : '0deg'})`}>
+                    <CoverArt
+                      title={movie.title}
+                      subtitle={movie.year ? `${movie.year} · ${movie.type}` : movie.type}
+                      year={movie.year}
+                      kind="movie"
+                      seed={movie.id}
+                      class="transition-transform duration-500 group-hover/poster:-translate-y-1"
+                    />
+                  </a>
+                ))
+              }
+            </div>
+            <p class="relative mt-6 border-t border-cream/15 pt-5 text-sm leading-7 text-cream/60">
+              租碟店里按类型分好的塑料盒，五毛钱一次。挑一张，回家放进 DVD 机，片头广告都舍不得跳过。
+            </p>
+            <a href="/movies/" class="relative mt-5 inline-flex w-fit items-center gap-2 border-b border-cream/30 pb-1 font-mono text-[11px] tracking-[0.18em] text-cream hover:border-mustard hover:text-mustard">
+              查看海报墙
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </Reveal>
+
+        <!-- 书籍 -->
+        <Reveal delay={120} class="min-w-0">
+          <div class="paper-card flex h-full flex-col p-6 sm:p-8">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="label-mono text-jade">Bookshelf · 抽屉</p>
+                <h3 class="mt-2 font-display text-3xl text-ink">借来的那一本</h3>
+              </div>
+              <a href="/books/" class="font-mono text-[10px] tracking-[0.18em] text-ink-faint transition-colors hover:text-jade">全部书籍 →</a>
+            </div>
+
+            <ul class="mt-7 divide-y divide-ink/10">
+              {
+                featuredBooks.map((book) => (
+                  <li>
+                    <a href="/books/" class="group/book flex items-center gap-4 py-4">
+                      <CoverArt title={book.title} subtitle={book.author} year={book.year} kind="book" seed={book.id} class="w-14 shrink-0" />
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-baseline justify-between gap-3">
+                          <h4 class="truncate font-display text-lg text-ink group-hover/book:text-jade">{book.title}</h4>
+                          <span class="shrink-0 font-mono text-[10px] tracking-[0.15em] text-ink-faint">{book.year}</span>
+                        </div>
+                        <p class="mt-0.5 text-xs text-ink-soft">{book.author} · {book.category}</p>
+                        {book.quote && <p class="mt-1 truncate text-[12px] text-ink-faint">「{book.quote}」</p>}
+                      </div>
+                      <span class="shrink-0 font-mono text-[10px] text-ink-faint transition-transform group-hover/book:translate-x-1">→</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <p class="mt-auto border-t border-ink/10 pt-5 text-sm leading-7 text-ink-soft">
+              晚自习的课桌、被窝里的手电筒、图书馆靠窗的位置——那些书，是自己找来的。
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 老物件 ============================== -->
+  <section class="relative overflow-hidden border-y border-ink/10 bg-paper-texture py-16 sm:py-20">
+    <div class="marquee-track items-center gap-6 border-b border-ink/10 pb-5" aria-hidden="true">
+      {
+        [0, 1].map(() => (
+          <div class="flex shrink-0 items-center gap-6">
+            {['打陀螺', '溜溜球', '万能充电器', '小霸王', '玻璃弹珠', '跳皮筋', '铁皮青蛙', '复读机', '四驱车', '电子宠物', '水浒卡', '大头贴'].map((name) => (
+              <span class="flex items-center gap-6 font-display text-2xl text-ink/30 sm:text-3xl">
+                {name}
+                <span class="h-1.5 w-1.5 rounded-full bg-vermilion/40"></span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mx-auto mt-14 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <Reveal>
+          <SectionHeader index="Objects" eyebrow="Museum of Memory" title="手上还留着温度的东西" description="它们不值钱，也说不出什么大道理。但看到的那一刻，你的手指会先想起怎么玩。" accent="vermilion" />
+        </Reveal>
+        <Reveal delay={100}>
+          <a href="/toys/" class="btn-retro shrink-0">走进老物件博物馆</a>
+        </Reveal>
+      </div>
+
+      <div class="mt-12 grid gap-4 sm:grid-cols-3">
+        {
+          featuredToys.map((toy, index) => (
+            <Reveal delay={index * 80}>
+              <a href="/toys/" class="paper-card paper-card-hover group flex h-full flex-col p-6">
+                <div class="flex items-center justify-between">
+                  <span class="label-mono text-vermilion">{toy.category}</span>
+                  <span class="font-mono text-[10px] tracking-[0.16em] text-ink-faint">{toy.yearStart} 年代</span>
+                </div>
+                <h3 class="mt-5 font-display text-2xl text-ink group-hover:text-vermilion">{toy.name}</h3>
+                {toy.aliases && toy.aliases.length > 0 && <p class="mt-1 font-mono text-[10px] tracking-[0.12em] text-ink-faint">又叫 {toy.aliases.join(' / ')}</p>}
+                <p class="mt-4 text-sm leading-7 text-ink-soft">{toy.description}</p>
+                {toy.memory && (
+                  <p class="mt-auto border-l-2 border-mustard/60 pl-3 pt-4 text-[13px] leading-6 text-ink-faint">「{toy.memory}」</p>
+                )}
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 时光机 CTA ============================== -->
+  <section class="py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <div class="relative overflow-hidden border-[1.5px] border-ink bg-night p-8 text-cream shadow-print sm:p-12">
+          <div class="pointer-events-none absolute inset-0 opacity-[0.07] line-grid"></div>
+          <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full border-[20px] border-mustard/10"></div>
+          <div class="scanlines pointer-events-none absolute inset-0 opacity-40"></div>
+
+          <div class="relative grid items-center gap-10 lg:grid-cols-[1.25fr_0.75fr]">
+            <div>
+              <p class="label-mono text-mustard">Time Machine · 已待机</p>
+              <h2 class="mt-4 font-display text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.2]">
+                输入你的出生年份，<br class="hidden sm:block" />把记忆调回那一年。
+              </h2>
+              <p class="mt-5 max-w-lg text-sm leading-7 text-cream/60">
+                生成一张只属于你的年代记忆卡：那一年的大事、你在听的歌、看过的剧、玩过的玩具，还有你几岁。
+              </p>
+
+              <form action="/time-machine/" method="get" class="mt-8 flex max-w-md flex-wrap gap-2">
+                <label for="birth-year" class="sr-only">出生年份</label>
+                <div class="flex flex-1 items-center gap-2 border-[1.5px] border-cream/30 bg-night-soft px-3">
+                  <input
+                    id="birth-year"
+                    name="birth"
+                    type="number"
+                    min="1980"
+                    max="2009"
+                    inputmode="numeric"
+                    placeholder="1990"
+                    class="w-full bg-transparent py-3 font-mono text-lg tracking-[0.2em] text-cream outline-none placeholder:text-cream/25"
+                  />
+                  <span class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-cream/40">年</span>
+                </div>
+                <button type="submit" class="btn-retro border-mustard bg-mustard text-ink hover:bg-cream">启动</button>
+              </form>
+
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <span class="font-mono text-[10px] tracking-[0.16em] text-cream/40">快速选择：</span>
+                {[1985, 1990, 1995, 2000].map((year) => (
+                  <a href={`/time-machine/?birth=${year}`} class="border border-cream/20 px-2 py-1 font-mono text-[10px] tracking-[0.16em] text-cream/60 transition-colors hover:border-mustard hover:text-mustard">
+                    {year}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div class="relative hidden lg:block">
+              <div class="border-[1.5px] border-cream/20 bg-night-soft/70 p-5">
+                <div class="flex items-center justify-between border-b border-cream/15 pb-3">
+                  <span class="font-mono text-[9px] tracking-[0.26em] text-cream/40">GY-TM / OS v1.0</span>
+                  <span class="flex gap-1.5"><i class="h-2 w-2 rounded-full bg-vermilion"></i><i class="h-2 w-2 rounded-full bg-mustard"></i><i class="h-2 w-2 rounded-full bg-jade"></i></span>
+                </div>
+                <div class="mt-4 font-mono text-[11px] leading-7 text-cream/50">
+                  <p class="flex justify-between"><span>YEAR</span><span class="text-mustard">1990</span></p>
+                  <p class="flex justify-between"><span>AGE</span><span class="text-cream">00</span></p>
+                  <p class="flex justify-between"><span>STATUS</span><span class="text-jade-soft">READY</span></p>
+                  <p class="flex justify-between"><span>MEMORY</span><span class="text-cream">FOUND</span></p>
+                </div>
+                <div class="mt-4 flex items-end gap-1" aria-hidden="true">
+                  {Array.from({ length: 18 }).map((_, index) => (
+                    <span class="w-full bg-mustard/70" style={`height:${8 + ((index * 7) % 26)}px`}></span>
+                  ))}
+                </div>
+                <p class="mt-4 border-t border-cream/15 pt-3 font-mono text-[9px] tracking-[0.2em] text-cream/35">
+                  请按下 PLAY 键开始回忆
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- ============================== 随机记忆 ============================== -->
+  <section class="border-t border-ink/10 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+        <Reveal>
+          <p class="label-mono text-jade">Shuffle · 随机播放</p>
+          <h2 class="mt-4 font-display text-[clamp(1.9rem,4vw,3rem)] leading-tight text-ink">不知道从哪儿开始？<br />那就随便翻一页。</h2>
+          <p class="mt-5 max-w-md text-sm leading-7 text-ink-soft">
+            从全站的内容里随机抽一条出来：可能是一句歌词、一句台词，也可能是某一年发生在世界另一头的大事。
+          </p>
+          <button type="button" data-memory-shuffle class="btn-retro mt-7 gap-2">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" stroke-linecap="square" />
+            </svg>
+            再翻一页
+          </button>
+        </Reveal>
+
+        <Reveal delay={120}>
+          <div data-memory-card class="paper-card relative flex min-h-[19rem] flex-col overflow-hidden p-8 sm:p-10">
+            <div class="pointer-events-none absolute inset-0 dot-grid opacity-30"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between">
+                <span class="label-mono text-vermilion" data-memory-kind>一首歌</span>
+                <span class="font-mono text-[9px] tracking-[0.24em] text-ink-faint">RANDOM MEMORY</span>
+              </div>
+              <h3 class="mt-5 font-display text-2xl leading-tight text-ink sm:text-3xl" data-memory-title>正在读取记忆……</h3>
+              <p class="mt-2 font-mono text-[11px] tracking-[0.16em] text-ink-faint" data-memory-meta></p>
+              <div data-memory-content class="mt-6 border-t border-ink/15 pt-6">
+                <p class="text-[15px] leading-8 text-ink-soft" data-memory-text></p>
+              </div>
+            </div>
+            <span class="pointer-events-none absolute bottom-4 right-6 font-mono text-[8rem] leading-none text-ink/[0.035]">♪</span>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 收尾 ============================== -->
+  <section class="relative overflow-hidden border-t border-ink/10 bg-paper-deep py-12">
+    <div class="marquee-track items-center" aria-hidden="true">
+      {
+        [0, 1].map(() => (
+          <div class="flex shrink-0 items-center gap-6">
+            {Array.from({ length: 6 }).map(() => (
+              <span class="flex items-center gap-6 font-display text-4xl tracking-wide text-ink/20 sm:text-5xl">
+                流金岁月 · 时光机
+                <span class="h-2 w-2 rounded-full bg-vermilion/50"></span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <script type="application/json" data-memory-pool set:html={memoryJson}></script>
+  <script>
+    import '../scripts/random-memory';
+    import '../scripts/hero-3d';
+  </script>
+</BaseLayout>

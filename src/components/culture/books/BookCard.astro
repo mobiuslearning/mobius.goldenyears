@@ -1,0 +1,91 @@
+---
+import type { Book } from '../../../types';
+import CoverArt from '../../shared/CoverArt.astro';
+import { eraOfYear } from '../../../lib/theme';
+
+interface Props {
+  book: Book;
+  index: number;
+}
+
+const { book, index } = Astro.props;
+const era = eraOfYear(book.year);
+const callNo = `${String(book.year).slice(2)}-${String(index + 1).padStart(2, '0')}`;
+const search = [book.title, book.author, book.year, book.country, book.category, book.quote, book.description]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<article
+  class="reveal group/card relative flex flex-col"
+  data-reveal
+  style={`--reveal-delay:${(index % 4) * 60}ms`}
+  data-item
+  data-era={era}
+  data-country={book.country}
+  data-category={book.category}
+  data-search={search}
+>
+  <!-- 封面：微微立起，像从书架上被抽出来 -->
+  <div class="relative">
+    <div
+      class="relative transition-transform duration-300 ease-out will-change-transform group-hover/card:-translate-y-1.5 group-hover/card:rotate-[-0.9deg]"
+    >
+      <CoverArt
+        title={book.title}
+        year={book.year}
+        kind="book"
+        label="BOOK"
+        class="shadow-print-sm transition-shadow duration-300 group-hover/card:shadow-print"
+      />
+      <!-- 书脊处的一道高光 -->
+      <span class="pointer-events-none absolute inset-y-0 left-0 w-[9%] bg-gradient-to-r from-black/30 to-transparent" aria-hidden="true"></span>
+      <!-- 贴在封面上的索书号纸签 -->
+      <span
+        class="pointer-events-none absolute -right-1.5 top-4 z-20 -rotate-2 border-[1.5px] border-ink bg-cream px-1.5 py-0.5 font-mono text-[8px] tracking-[0.12em] text-ink shadow-print-sm"
+      >
+        {callNo}
+      </span>
+      {
+        book.featured && (
+          <span class="pointer-events-none absolute -left-1.5 top-3 z-20 -rotate-3 border-[1.5px] border-vermilion bg-vermilion px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.18em] text-cream">
+            推荐
+          </span>
+        )
+      }
+    </div>
+  </div>
+
+  <!-- 借书卡：书名、作者、年份、国家、类别、引语 -->
+  <div
+    class="relative z-10 mt-3 flex flex-1 flex-col border-[1.5px] border-ink bg-cream px-3 py-3 transition-transform duration-300 group-hover/card:-translate-y-0.5"
+  >
+    <div class="flex items-baseline justify-between gap-1.5">
+      <h3 class="line-clamp-1 font-display text-[15px] leading-snug tracking-tight text-ink sm:text-base">{book.title}</h3>
+      <span class="shrink-0 font-mono text-[10px] tracking-[0.1em] text-ink-faint">{book.year}</span>
+    </div>
+    <p class="mt-0.5 line-clamp-1 font-mono text-[10px] tracking-[0.06em] text-ink-soft">{book.author}</p>
+    <div class="mt-2 flex flex-wrap items-center gap-1">
+      <span class="border border-jade/60 px-1 py-0.5 font-mono text-[8px] tracking-[0.14em] text-jade">{book.country}</span>
+      <span class="border border-vermilion/60 px-1 py-0.5 font-mono text-[8px] tracking-[0.14em] text-vermilion">{book.category}</span>
+      <span class="ml-auto font-mono text-[8px] tracking-[0.12em] text-ink-faint">{era.replace('s', '')}S</span>
+    </div>
+    {
+      book.quote && (
+        <blockquote class="mt-2.5 line-clamp-2 border-l-2 border-vermilion/70 pl-2 font-display text-[12px] italic leading-5 text-ink-soft sm:text-[12.5px]">
+          「{book.quote}」
+        </blockquote>
+      )
+    }
+    <p class="mt-2 hidden text-[11.5px] leading-5 text-ink-faint line-clamp-2 sm:block">{book.description}</p>
+    <div class="mt-auto flex items-center justify-between border-t border-ink/10 pt-2 font-mono text-[8px] tracking-[0.12em] text-ink-faint">
+      <span>馆藏 {book.category}</span>
+      <span>{callNo}</span>
+    </div>
+  </div>
+
+  <!-- 书架板：让每本书都像立在一格真实的书架上 -->
+  <span
+    class="pointer-events-none absolute -bottom-[7px] left-[-7px] right-[-7px] z-0 h-[7px] border-y-[1.5px] border-ink bg-[linear-gradient(180deg,#c69a60,#916a37)]"
+    aria-hidden="true"></span>
+</article>

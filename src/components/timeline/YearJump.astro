@@ -1,0 +1,105 @@
+---
+interface YearItem {
+  year: number;
+  count: number;
+}
+
+interface Props {
+  years: YearItem[];
+}
+
+const { years } = Astro.props;
+const startYear = years[0]?.year ?? 1980;
+const endYear = years[years.length - 1]?.year ?? 2009;
+---
+
+<div
+  class="sticky top-16 z-30 border-b-[1.5px] border-ink/15 bg-paper/95 backdrop-blur-sm lg:top-[7.5rem]"
+>
+  <div class="relative mx-auto flex h-11 max-w-7xl items-center gap-2.5 px-4 sm:gap-3 sm:px-6 lg:px-8">
+    <div class="flex shrink-0 items-baseline gap-1.5">
+      <span class="hidden font-mono text-[9px] tracking-[0.24em] text-ink-faint sm:inline">NOW</span>
+      <span class="font-display text-lg leading-none tabular-nums text-vermilion" data-current-year>
+        {startYear}
+      </span>
+    </div>
+    <span class="hidden h-5 w-px shrink-0 bg-ink/15 sm:block" aria-hidden="true"></span>
+
+    <nav
+      data-year-jump
+      class="no-scrollbar relative flex flex-1 items-center gap-0.5 overflow-x-auto"
+      aria-label="年份快速跳转"
+    >
+      {
+        years.map(({ year, count }) =>
+          count > 0 ? (
+            <a
+              href={`#year-${year}`}
+              data-year-jump-link
+              data-year={year}
+              class="year-chip relative shrink-0 px-1.5 py-1 font-mono text-[10.5px] tracking-[0.04em] text-ink-faint transition-colors hover:text-ink"
+              aria-label={`跳到 ${year} 年`}
+            >
+              {year}
+            </a>
+          ) : (
+            <span
+              class="shrink-0 px-1.5 py-1 font-mono text-[10.5px] tracking-[0.04em] text-ink-faint/35"
+              aria-hidden="true"
+              title={`${year} 年暂无记录`}
+            >
+              {year}
+            </span>
+          ),
+        )
+      }
+    </nav>
+
+    <span class="hidden shrink-0 font-mono text-[9px] tracking-[0.2em] text-ink-faint md:inline">
+      {startYear} — {endYear}
+    </span>
+
+    <!-- 顶部刻度条：滚动进度 -->
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-ink/10" aria-hidden="true">
+      <div
+        class="h-full w-full origin-left bg-vermilion"
+        data-timeline-progress
+        style="transform:scaleX(0)"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .year-chip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    width: 0;
+    height: 2px;
+    background: var(--color-vermilion);
+    transform: translateX(-50%);
+    transition: width 0.2s ease;
+  }
+  .year-chip:hover::after {
+    width: 10px;
+  }
+  .year-chip.is-active {
+    color: var(--color-vermilion);
+    font-weight: 700;
+  }
+  .year-chip.is-active::after {
+    width: 16px;
+  }
+  .year-chip.is-disabled {
+    opacity: 0.32;
+    pointer-events: none;
+  }
+</style>

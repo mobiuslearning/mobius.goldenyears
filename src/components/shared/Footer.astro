@@ -1,0 +1,76 @@
+---
+import { site } from '../../data/site';
+
+const year = new Date().getFullYear();
+const columns = [
+  {
+    title: '时光目录',
+    links: site.nav.filter((item) => ['/', '/timeline/'].includes(item.href)).map((item) => ({
+      label: item.label,
+      href: item.href,
+    })),
+  },
+  {
+    title: '拾光收藏',
+    links: site.nav
+      .filter((item) => ['/music/', '/books/', '/movies/', '/toys/'].includes(item.href))
+      .map((item) => ({ label: item.label, href: item.href })),
+  },
+  {
+    title: '关于本站',
+    links: [
+      { label: '缘起', href: '/about/' },
+      { label: '留言板', href: '/about/#comments' },
+      { label: '时光机', href: '/time-machine/' },
+    ],
+  },
+];
+---
+
+<footer class="relative mt-24 overflow-hidden border-t-[1.5px] border-ink bg-night text-cream/80">
+  <div class="pointer-events-none absolute -right-8 -top-16 select-none font-display text-[12rem] leading-none text-cream/[0.04]">
+    1996
+  </div>
+  <div class="pointer-events-none absolute inset-0 opacity-[0.06] line-grid" aria-hidden="true"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+      <div>
+        <p class="font-mono text-[10px] tracking-[0.3em] text-mustard">SINCE 1980 — 2009</p>
+        <h2 class="mt-3 font-display text-3xl tracking-wide text-cream">流金岁月 · 时光机</h2>
+        <p class="mt-4 max-w-sm text-sm leading-7 text-cream/60">
+          一台不插电的时光机。收藏卡带里的旋律、课本下的书、录像厅的光，还有那些被时间磨得发亮的小玩意儿。
+        </p>
+        <div class="mt-6 flex flex-wrap gap-2">
+          <span class="stamp text-mustard">磁带 SIDE A</span>
+          <span class="stamp text-cream/50">静态 · 无跟踪</span>
+          <span class="stamp text-jade-soft">Astro + Tailwind</span>
+        </div>
+      </div>
+
+      {
+        columns.map((column) => (
+          <div>
+            <h3 class="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cream/40">{column.title}</h3>
+            <ul class="mt-4 space-y-2.5">
+              {column.links.map((link) => (
+                <li>
+                  <a href={link.href} class="link-underline text-sm text-cream/70 transition-colors hover:text-mustard">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-12 flex flex-col gap-4 border-t border-cream/10 pt-6 text-[11px] leading-6 text-cream/40 sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} {site.title} · 一个关于 80 后、90 后的私人记忆档案</p>
+      <p class="font-mono tracking-wider">
+        内容仅供怀旧交流 · 图片与音乐版权归原作者所有 · 评论系统 Twikoo（预留）
+      </p>
+    </div>
+  </div>
+</footer>

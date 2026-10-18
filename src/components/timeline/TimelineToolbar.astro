@@ -1,0 +1,108 @@
+---
+import { eras } from '../../data/site';
+
+interface Props {
+  total: number;
+}
+
+const { total } = Astro.props;
+
+const scopeOptions = [
+  { value: 'all', label: '全部' },
+  { value: 'china', label: '中国' },
+  { value: 'global', label: '世界' },
+];
+
+const chipClass =
+  'border-[1.5px] px-2.5 py-1 font-mono text-[11px] tracking-[0.12em] transition-colors';
+const idleChip = 'border-ink/25 bg-cream text-ink-soft';
+---
+
+<div class="relative z-40 border-y-[1.5px] border-ink/20 bg-paper/95 backdrop-blur-sm lg:sticky lg:top-16">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2.5 py-2.5 lg:h-14 lg:flex-nowrap lg:py-0">
+      <!-- 年代 -->
+      <div class="flex min-w-0 items-center gap-1.5">
+        <span class="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.24em] text-ink-faint xl:inline">
+          年代
+        </span>
+        <button
+          type="button"
+          data-filter
+          data-filter-key="era"
+          data-filter-value="all"
+          class:list={[chipClass, idleChip]}
+          aria-pressed="false">全部</button
+        >
+        {
+          eras.map((era) => (
+            <button
+              type="button"
+              data-filter
+              data-filter-key="era"
+              data-filter-value={era.id}
+              class:list={[chipClass, idleChip]}
+              aria-pressed="false">
+              {era.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <span class="hidden h-5 w-px shrink-0 bg-ink/15 sm:block" aria-hidden="true"></span>
+
+      <!-- 地域 -->
+      <div class="flex items-center gap-1.5">
+        <span class="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.24em] text-ink-faint xl:inline">
+          地域
+        </span>
+        {
+          scopeOptions.map((option) => (
+            <button
+              type="button"
+              data-filter
+              data-filter-key="scope"
+              data-filter-value={option.value}
+              class:list={[chipClass, idleChip]}
+              aria-pressed="false">
+              {option.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- 搜索 -->
+      <label
+        class="relative flex min-w-0 flex-1 items-center gap-1.5 border-[1.5px] border-ink/30 bg-cream px-2.5 py-1.5 transition-colors focus-within:border-ink sm:ml-auto sm:w-52 sm:flex-none lg:w-48"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-3.5 w-3.5 shrink-0 text-ink-faint"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m16.5 16.5 4 4" stroke-linecap="square"></path>
+        </svg>
+        <input
+          type="search"
+          data-search-input
+          placeholder="搜索记忆"
+          aria-label="搜索时光轴事件"
+          class="w-full min-w-0 bg-transparent font-mono text-[11px] tracking-[0.08em] text-ink outline-none placeholder:text-ink-faint/70"
+        />
+        <kbd
+          class="hidden shrink-0 border border-ink/20 px-1 font-mono text-[9px] leading-4 text-ink-faint sm:inline"
+          aria-hidden="true">/</kbd
+        >
+      </label>
+
+      <!-- 结果数 -->
+      <p class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-ink-faint">
+        共 <b data-result-count class="font-bold text-ink">{total}</b> 条
+      </p>
+    </div>
+  </div>
+</div>

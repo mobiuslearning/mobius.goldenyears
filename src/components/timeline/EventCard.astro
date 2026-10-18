@@ -1,0 +1,173 @@
+---
+import type { TimeEvent } from '../../types';
+
+interface Props {
+  event: TimeEvent;
+  eraId: '1980s' | '1990s' | '2000s';
+  /** 同一年内的序号，从 1 开始 */
+  ordinal: number;
+  /** 入场延迟（毫秒），同屏卡片错开一点 */
+  delay?: number;
+}
+
+const { event, eraId, ordinal, delay = 0 } = Astro.props;
+
+const isChina = event.scope === 'china';
+const scopeLabel = isChina ? '中国' : '世界';
+const dateLabel = event.date ? event.date.replace(/-/g, '.') : String(event.year);
+const searchText = [
+  String(event.year),
+  event.title,
+  event.description,
+  event.impact ?? '',
+  event.category,
+  scopeLabel,
+  eraId,
+  ...(event.tags ?? []),
+]
+  .join(' ')
+  .toLowerCase();
+
+const scopeTone = isChina
+  ? 'border-vermilion/60 bg-vermilion/10 text-vermilion'
+  : 'border-sky/70 bg-sky/15 text-ink-soft';
+const cardClass = isChina
+  ? 'event-card--china lg:w-[calc(100%-6rem)]'
+  : 'event-card--global lg:ml-24 lg:w-[calc(100%-6rem)]';
+---
+
+<article
+  id={`event-${event.id}`}
+  data-item
+  data-scope={event.scope}
+  data-era={eraId}
+  data-search={searchText}
+  data-event-reveal
+  class:list={['event-card relative', cardClass]}
+  style={`--event-delay:${delay}ms`}
+>
+  <!-- 从河面连到卡片的一小段水痕 + 河面上的光点 -->
+  <span
+    aria-hidden="true"
+    class:list={[
+      'event-connector pointer-events-none absolute top-[1.75rem]',
+      isChina ? 'h-px bg-vermilion/35' : 'h-0 border-t-[1.5px] border-dashed border-sky/45',
+    ]}
+  ></span>
+  <span
+    aria-hidden="true"
+    class:list={[
+      'event-dot pointer-events-none absolute top-[1.44rem] h-2 w-2 -translate-x-1/2 rounded-full',
+      isChina ? 'bg-vermilion' : 'bg-sky',
+    ]}
+  ></span>
+
+  <div
+    class:list={[
+      'paper-card paper-card-hover relative',
+      isChina ? 'border-l-[3px] border-l-vermilion' : 'border-l-[3px] border-l-sky',
+    ]}
+  >
+    <!-- 胶带：剪贴报的边角 -->
+    <span
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-2.5 right-7 h-5 w-16 -rotate-2 border border-ink/10 bg-mustard/35"
+    ></span>
+
+    <div class="flex flex-col lg:flex-row">
+      <!-- 票根存根：年代 / 地域 / 类别 / 编号 -->
+      <div
+        class="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b-[1.5px] border-dashed border-ink/20 px-4 py-3 lg:w-[9.5rem] lg:shrink-0 lg:flex-col lg:items-start lg:gap-y-2 lg:border-b-0 lg:border-r-[1.5px] lg:border-r-ink/20 lg:px-4 lg:py-4"
+      >
+        <span class:list={['stamp shrink-0', scopeTone]}>{scopeLabel}</span>
+        <span class="font-mono text-[10px] tracking-[0.16em] text-ink">{dateLabel}</span>
+        <span class="border border-ink/20 px-1.5 py-0.5 text-[10px] tracking-[0.08em] text-ink-soft">
+          {event.category}
+        </span>
+        <span class="ml-auto font-mono text-[9px] tracking-[0.18em] text-ink-faint lg:ml-0 lg:mt-auto">
+          {eraId.toUpperCase()}&nbsp;·&nbsp;NO.{String(ordinal).padStart(2, '0')}
+        </span>
+      </div>
+
+      <!-- 正文 -->
+      <div class="min-w-0 flex-1 px-4 py-3.5 sm:px-5 sm:py-4">
+        <h4 class="font-display text-[1.15rem] leading-snug tracking-tight text-ink sm:text-[1.32rem]">
+          {event.title}
+        </h4>
+        <p class="mt-2 text-[13.5px] leading-[1.9] text-ink-soft text-pretty">{event.description}</p>
+
+        {
+          event.impact && (
+            <p class="mt-3 flex gap-2 border-l-2 border-vermilion/45 pl-3 text-[12.5px] leading-6 text-ink-faint">
+              <span class="shrink-0 font-mono text-[9px] tracking-[0.18em] text-vermilion">影响</span>
+              <span class="min-w-0">{event.impact}</span>
+            </p>
+          )
+        }
+
+        {
+          event.tags && event.tags.length > 0 && (
+            <ul class="mt-3.5 flex flex-wrap gap-1.5">
+              {event.tags.map((tag) => (
+                <li class="border border-ink/20 bg-paper-deep/35 px-1.5 py-0.5 font-mono text-[10px] tracking-[0.06em] text-ink-faint">
+                  #{tag}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .event-card {
+    transition:
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--event-delay, 0ms);
+  }
+  .event-card.is-pending {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .event-card.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 移动端：河流在左侧 28px 处，卡片贴着它 */
+  .event-connector {
+    left: -1.75rem;
+    width: 1.75rem;
+  }
+  .event-dot {
+    left: -1.75rem;
+  }
+
+  /* 桌面端：年份刻度列 8.5rem + 间距 2.5rem，河在 11rem 处 */
+  @media (min-width: 1024px) {
+    .event-card--china .event-connector {
+      left: -2.5rem;
+      width: 2.5rem;
+    }
+    .event-card--china .event-dot {
+      left: -2.5rem;
+    }
+    .event-card--global .event-connector {
+      left: -8.5rem;
+      width: 8.5rem;
+    }
+    .event-card--global .event-dot {
+      left: -8.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .event-card.is-pending {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

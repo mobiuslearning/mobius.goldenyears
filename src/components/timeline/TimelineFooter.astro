@@ -1,0 +1,54 @@
+---
+import { sections } from '../../data/site';
+import { accentMap, type AccentKey } from '../../lib/theme';
+
+const links = sections.filter((section) => ['/music/', '/books/', '/movies/', '/toys/'].includes(section.href));
+const toneOf = (accent: string) => accentMap[(accent as AccentKey) in accentMap ? (accent as AccentKey) : 'vermilion'];
+---
+
+<section class="relative overflow-hidden border-t-[1.5px] border-ink/20 bg-paper-deep/30">
+  <div class="pointer-events-none absolute inset-0 opacity-50 line-grid" aria-hidden="true"></div>
+  <div class="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
+      <div>
+        <p class="label-mono text-vermilion">EPILOGUE / 2009 之后</p>
+        <h2 class="mt-3 font-display text-[clamp(1.8rem,4vw,2.9rem)] leading-[1.15] text-ink">
+          河到这里，先停一下
+        </h2>
+        <p class="mt-4 max-w-lg text-[14px] leading-8 text-ink-soft text-pretty">
+          时间轴收在 2009 年。再往后的事，交给别的板块去讲：磁带里的歌、课桌下的书、录像厅的片子、抽屉里的小玩意儿。它们和这条河一样，都是从那些年里流出来的。
+        </p>
+        <p class="mt-4 font-mono text-[10px] leading-6 tracking-[0.14em] text-ink-faint">
+          年份与事件来自公开资料，只作怀旧记录；如发现错漏，欢迎在留言板指出。
+        </p>
+        <a href="#main" class="btn-retro mt-7 inline-flex">回到河的源头</a>
+      </div>
+
+      <ul class="grid gap-3 sm:grid-cols-2">
+        {
+          links.map((link) => {
+            const tone = toneOf(link.accent);
+            return (
+              <li>
+                <a
+                  href={link.href}
+                  class="group flex h-full flex-col border-[1.5px] border-ink bg-cream p-4 shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  <span class="flex items-center justify-between">
+                    <span class:list={['font-mono text-[9px] tracking-[0.24em]', tone.text]}>{link.index}</span>
+                    <span class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+                      {link.en.toUpperCase()}
+                    </span>
+                  </span>
+                  <span class="mt-2 font-display text-xl leading-none text-ink">{link.title}</span>
+                  <span class="mt-2 text-[12px] leading-6 text-ink-soft">{link.description}</span>
+                  <span class:list={['mt-3 h-1 w-8', tone.bg]} aria-hidden="true" />
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </div>
+</section>

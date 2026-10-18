@@ -1,0 +1,135 @@
+---
+import { accentMap, type AccentKey } from '../../lib/theme';
+import type { Era } from '../../types';
+
+interface EraRow {
+  id: Era['id'];
+  label: string;
+  years: string;
+  name: string;
+  color: Era['color'];
+  count: number;
+}
+
+interface Props {
+  total: number;
+  coveredYears: number;
+  china: number;
+  global: number;
+  startYear: number;
+  endYear: number;
+  eraRows: EraRow[];
+  years: number[];
+}
+
+const { total, coveredYears, china, global, startYear, endYear, eraRows, years } = Astro.props;
+
+const toneOf = (color: Era['color']) => accentMap[color as AccentKey];
+const tickYears = years;
+const decadeMarks = years.filter((year) => year % 10 === 0 && year > startYear && year < endYear);
+---
+
+<section class="relative overflow-hidden border-b-[1.5px] border-ink/20 bg-paper-deep/30">
+  <div class="pointer-events-none absolute inset-0 opacity-60 line-grid" aria-hidden="true"></div>
+  <span
+    class="pointer-events-none absolute -right-6 -top-10 hidden select-none font-display text-[17rem] leading-none text-ink/[0.045] lg:block"
+    aria-hidden="true">{endYear}</span
+  >
+
+  <div class="relative mx-auto max-w-7xl px-4 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-16 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start lg:gap-12">
+      <div>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="label-mono text-vermilion">00 / Timeline</span>
+          <span class="h-px w-8 bg-vermilion/60" aria-hidden="true"></span>
+          <span class="label-mono text-ink-faint">{startYear} — {endYear}</span>
+        </div>
+
+        <h1 class="mt-5 font-display text-[clamp(2.2rem,5vw,4rem)] leading-[1.08] tracking-tight text-ink">
+          <span class="block">一条河，</span>
+          <span class="block">从 <span class="text-vermilion">{startYear}</span> 流到 <span
+              class="text-vermilion">{endYear}</span
+            ></span>
+        </h1>
+
+        <p class="mt-5 max-w-2xl text-[14.5px] leading-8 text-ink-soft text-pretty">
+          深圳的脚手架、春晚第一次接进观众电话、录像厅里循环的港片、网吧门口排队等机位的少年——三十年的事被压缩成一条河。往下滚动，年份会告诉你走到了哪里；左岸是我们这边，右岸是外面的世界。
+        </p>
+
+        <div class="mt-6 flex flex-wrap items-center gap-2.5">
+          <span class="stamp text-ink">共 {total} 条记录</span>
+          <span class="stamp text-vermilion">中国 {china}</span>
+          <span class="stamp text-sky">世界 {global}</span>
+          <span class="stamp text-ink-faint">{coveredYears} 个年份</span>
+        </div>
+
+        <p class="mt-4 font-mono text-[10px] tracking-[0.18em] text-ink-faint">
+          按年代 / 地域筛选 · 或点年份条快速跳转
+        </p>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between border-b-[1.5px] border-ink pb-2">
+          <span class="label-mono text-ink-faint">河道 · 三个十年</span>
+          <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">SCROLL ↓</span>
+        </div>
+        <ul class="mt-3 space-y-2">
+          {
+            eraRows.map((row, index) => {
+              const tone = toneOf(row.color);
+              return (
+                <li>
+                  <a
+                    href={`#era-${row.id}`}
+                    class="group flex items-center gap-3 border-[1.5px] border-ink bg-cream px-3 py-2.5 shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    <span class:list={['h-8 w-1.5 shrink-0', tone.bg]} aria-hidden="true" />
+                    <span class="font-mono text-[9px] tracking-[0.18em] text-ink-faint">
+                      CH.{String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span class="font-display text-lg leading-none text-ink">{row.label}</span>
+                    <span class="min-w-0 truncate text-[12px] text-ink-soft">{row.name}</span>
+                    <span class="ml-auto shrink-0 font-mono text-[10px] tracking-[0.12em] text-ink-faint">
+                      {row.count}
+                    </span>
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+    </div>
+
+    <!-- 河流刻度尺 -->
+    <div class="relative mt-9" aria-hidden="true">
+      <div class="relative h-6 border-t-[1.5px] border-ink/30">
+        <div class="absolute inset-x-0 top-0 flex items-start justify-between">
+          {
+            tickYears.map((year) => (
+              <span
+                class:list={[
+                  'w-px',
+                  year % 10 === 0 ? 'h-5 bg-ink/70' : year % 5 === 0 ? 'h-3.5 bg-ink/45' : 'h-2 bg-ink/25',
+                ]}
+              />
+            ))
+          }
+        </div>
+      </div>
+      <div class="relative mt-1 h-4 font-mono text-[9px] tracking-[0.22em] text-ink-faint">
+        <span class="absolute left-0 top-0">{startYear}</span>
+        {
+          decadeMarks.map((year) => (
+            <span
+              class="absolute top-0 -translate-x-1/2"
+              style={`left:${(((year - startYear) / (endYear - startYear)) * 100).toFixed(2)}%`}>
+              {year}
+            </span>
+          ))
+        }
+        <span class="absolute right-0 top-0">{endYear}</span>
+      </div>
+    </div>
+  </div>
+</section>

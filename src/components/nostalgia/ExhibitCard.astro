@@ -1,0 +1,146 @@
+---
+/**
+ * 单件展品：大编号 + 名称 + 别名 + 流行年份 + 类别展签 + 描述 + 玩法（可展开）+ 私人记忆。
+ * data-item / data-category / data-era / data-search 供共享 collection.ts 筛选使用。
+ */
+import Reveal from '../shared/Reveal.astro';
+import type { NostalgiaItem } from '../../types';
+import { categoryTone, eraOfYear, exhibitSearchText, yearsLabel } from './museum';
+
+interface Props {
+  item: NostalgiaItem;
+  index: number;
+}
+
+const { item, index } = Astro.props;
+const no = String(index + 1).padStart(2, '0');
+const tone = categoryTone(item.category);
+const era = eraOfYear(item.yearStart);
+const years = yearsLabel(item);
+const search = exhibitSearchText(item);
+const hasHowTo = Boolean(item.howTo && item.howTo.length > 0);
+const delay = (index % 4) * 60;
+---
+<Reveal class="h-full" delay={delay}>
+  <div data-item data-category={item.category} data-era={era} data-search={search} class="h-full">
+    <article
+      class="group/card relative flex h-full flex-col border-[1.5px] border-ink bg-cream shadow-print transition-[transform,box-shadow] duration-300 ease-out hover:-translate-x-0.5 hover:-translate-y-1 hover:rotate-[-0.35deg] hover:shadow-[6px_6px_0_0_var(--color-ink)]"
+    >
+      <div class="h-1.5 w-full" style={`background:${tone};`} aria-hidden="true"></div>
+
+      <div class="flex items-start justify-between gap-3 px-4 pt-3">
+        <span class="font-mono text-[10px] font-bold tracking-[0.26em] text-ink-faint">NO. {no}</span>
+        <div class="flex flex-wrap items-center justify-end gap-1.5">
+          {
+            item.featured && (
+              <span class="bg-mustard px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.14em] text-ink">
+                重点展品
+              </span>
+            )
+          }
+          <span class="stamp shrink-0" style={`color:${tone};`}>{item.category}</span>
+        </div>
+      </div>
+
+      <div class="relative px-4 pt-1.5">
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute -right-1 -top-8 select-none font-display text-[5.4rem] leading-none tracking-tight text-ink/[0.055]"
+        >
+          {no}
+        </span>
+        <h3 class="relative font-display text-[1.5rem] leading-tight tracking-tight text-ink">{item.name}</h3>
+        {
+          item.aliases && item.aliases.length > 0 && (
+            <p class="relative mt-1.5 text-[11px] leading-5 text-ink-faint">
+              <span class="font-mono tracking-[0.16em]">又名</span>{' '}
+              <span class="font-body">{item.aliases.join(' / ')}</span>
+            </p>
+          )
+        }
+        <div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[9px] tracking-[0.14em] text-ink-faint">
+          <span class="flex items-center gap-1.5">
+            <span class="h-1.5 w-1.5" style={`background:${tone};`} aria-hidden="true"></span>
+            {years}
+          </span>
+          <span>{hasHowTo ? `${item.howTo!.length} 步玩法` : '仅存展签'}</span>
+        </div>
+      </div>
+
+      <p class="mt-3 px-4 text-[13.5px] leading-7 text-ink-soft text-pretty">{item.description}</p>
+
+      {
+        item.memory && (
+          <blockquote
+            class="mx-4 mt-3 border-l-2 pl-3 font-display text-[13px] leading-6 text-ink/75"
+            style={`border-color:${tone};`}
+          >
+            「{item.memory}」
+          </blockquote>
+        )
+      }
+
+      <div class="mt-auto px-4 pb-4 pt-4">
+        {
+          hasHowTo ? (
+            <details class="exhibit-details border-t border-dashed border-ink/25 pt-3">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-2 font-mono text-[9px] tracking-[0.2em] text-ink-faint transition-colors hover:text-ink">
+                <span>玩法 / 使用说明 · {item.howTo!.length} 步</span>
+                <span class="exhibit-plus text-base leading-none transition-transform duration-200" aria-hidden="true">
+                  +
+                </span>
+              </summary>
+              <ol class="exhibit-details-body mt-3 space-y-2">
+                {item.howTo!.map((step, stepIndex) => (
+                  <li class="flex items-start gap-2.5 text-[12.5px] leading-6 text-ink-soft">
+                    <span
+                      class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center border font-mono text-[9px] font-bold"
+                      style={`border-color:${tone}; color:${tone};`}
+                    >
+                      {stepIndex + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          ) : (
+            <p class="border-t border-dashed border-ink/25 pt-3 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+              展签 · 无玩法记录
+            </p>
+          )
+        }
+      </div>
+    </article>
+  </div>
+</Reveal>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary {
+    list-style: none;
+  }
+  details[open] .exhibit-plus {
+    transform: rotate(45deg);
+  }
+  @keyframes exhibit-details-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  details[open] .exhibit-details-body {
+    animation: exhibit-details-in 0.22s ease-out both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    details[open] .exhibit-details-body {
+      animation: none;
+    }
+  }
+</style>

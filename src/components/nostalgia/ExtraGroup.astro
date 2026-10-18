@@ -1,0 +1,30 @@
+---
+/**
+ * 后厅扩展分组：根据分组语义在三种陈列排版之间轮换，
+ * 保证数据增减时页面节奏依然有变化。
+ */
+import type { ExtraGroup as ExtraGroupData } from '../../types';
+import { layoutForGroup } from './museum';
+import ShelfGroup from './ShelfGroup.astro';
+import TvGuideGroup from './TvGuideGroup.astro';
+import AdWallGroup from './AdWallGroup.astro';
+
+interface Props {
+  group: ExtraGroupData;
+  index: number;
+}
+
+const { group, index } = Astro.props;
+const layout = layoutForGroup(group, index);
+---
+<div id={`wing-${group.id}`} class="scroll-mt-24">
+  {
+    layout === 'shelf' ? (
+      <ShelfGroup group={group} index={index} />
+    ) : layout === 'tv' ? (
+      <TvGuideGroup group={group} index={index} />
+    ) : (
+      <AdWallGroup group={group} index={index} />
+    )
+  }
+</div>

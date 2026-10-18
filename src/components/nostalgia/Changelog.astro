@@ -1,0 +1,44 @@
+---
+/**
+ * 更新日志：左侧日期，右侧内容，细竖线 + 方形节点。
+ */
+interface Entry {
+  date: string;
+  title: string;
+  note: string;
+  tag?: string;
+  pending?: boolean;
+}
+
+interface Props {
+  entries: Entry[];
+}
+
+const { entries } = Astro.props;
+---
+<ol class="relative">
+  {
+    entries.map((entry) => (
+      <li class="grid gap-x-6 gap-y-2 border-t-[1.5px] border-ink/12 py-5 first:border-t-0 first:pt-0 sm:grid-cols-[8.5rem_1fr]">
+        <div class="flex flex-wrap items-center gap-2 sm:block">
+          <span class="font-mono text-[10px] tracking-[0.14em] text-vermilion">{entry.date}</span>
+          {entry.tag && (
+            <span
+              class:list={['stamp mt-0 sm:mt-2', entry.pending ? 'text-ink-faint' : 'text-jade']}
+            >
+              {entry.tag}
+            </span>
+          )}
+        </div>
+        <div class="relative sm:border-l-[1.5px] sm:border-ink/15 sm:pl-6">
+          <span
+            class="absolute -left-[5.5px] top-2 hidden h-2.5 w-2.5 border-[1.5px] border-ink bg-paper sm:block"
+            aria-hidden="true"
+          ></span>
+          <p class="font-display text-lg leading-snug text-ink">{entry.title}</p>
+          <p class="mt-1.5 text-sm leading-7 text-ink-soft text-pretty">{entry.note}</p>
+        </div>
+      </li>
+    ))
+  }
+</ol>

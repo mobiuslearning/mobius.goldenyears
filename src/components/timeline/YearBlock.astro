@@ -1,0 +1,76 @@
+---
+import type { TimeEvent } from '../../types';
+import EventCard from './EventCard.astro';
+
+interface Props {
+  year: number;
+  eraId: '1980s' | '1990s' | '2000s';
+  events: TimeEvent[];
+}
+
+const { year, eraId, events } = Astro.props;
+const china = events.filter((event) => event.scope === 'china').length;
+const global = events.length - china;
+const label = `${year} 年，${events.length} 条记忆`;
+---
+
+<section
+  id={`year-${year}`}
+  data-year-block
+  data-year={year}
+  data-era={eraId}
+  class="relative scroll-mt-[7rem] py-5 sm:py-6 lg:scroll-mt-[10.5rem] lg:py-7"
+  aria-label={label}
+>
+  <div class="lg:grid lg:grid-cols-[8.5rem_minmax(0,1fr)] lg:gap-x-10">
+    <!-- 桌面：年份刻度，sticky 在左侧 -->
+    <div class="hidden lg:block">
+      <div class="sticky top-[10.5rem]">
+        <div class="relative text-right">
+          <span class="absolute right-[-2.5rem] top-[0.95rem] h-px w-10 bg-ink/25" aria-hidden="true"></span>
+          <span
+            class="absolute right-[-2.5rem] top-[0.72rem] h-2.5 w-2.5 -translate-x-1/2 rounded-full border-[1.5px] border-ink bg-paper"
+            aria-hidden="true"></span>
+          <h3 class="font-display text-[2.9rem] font-bold leading-none tracking-tight text-ink">
+            {year}
+          </h3>
+          <p class="mt-1.5 font-mono text-[9px] uppercase tracking-[0.24em] text-ink-faint">
+            {events.length} 条 · {eraId}
+          </p>
+          <p class="mt-2.5 flex items-center justify-end gap-2 font-mono text-[9px] tracking-[0.06em] text-ink-soft">
+            <span class="inline-flex items-center gap-1">
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-vermilion"></span>
+              中国 {china}
+            </span>
+            <span class="inline-flex items-center gap-1">
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky"></span>
+              世界 {global}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 事件卡 -->
+    <div class="pl-7 lg:pl-10">
+      <!-- 移动：年份在顶部（sticky 年份由顶部刻度条承担） -->
+      <div class="relative mb-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 lg:hidden">
+        <span
+          class="absolute -left-7 top-[0.9rem] h-2 w-2 -translate-x-1/2 rounded-full border-[1.5px] border-vermilion bg-paper"
+          aria-hidden="true"></span>
+        <h3 class="font-display text-2xl leading-none text-ink">{year}</h3>
+        <span class="font-mono text-[10px] tracking-[0.14em] text-ink-faint">
+          {events.length} 条 · 中国 {china} · 世界 {global}
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-5 lg:gap-6">
+        {
+          events.map((event, index) => (
+            <EventCard event={event} eraId={eraId} ordinal={index + 1} delay={(index % 3) * 70} />
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

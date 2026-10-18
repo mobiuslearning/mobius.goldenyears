@@ -1,0 +1,462 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/shared/SectionHeader.astro';
+import Reveal from '../components/shared/Reveal.astro';
+import Comment from '../components/shared/Comment.astro';
+import Seal from '../components/nostalgia/Seal.astro';
+import Changelog from '../components/nostalgia/Changelog.astro';
+import { sections } from '../data/site';
+import { eventStats } from '../data/events';
+import { songs } from '../data/culture/music';
+import { books } from '../data/culture/books';
+import { movies } from '../data/culture/movies';
+import { toys } from '../data/nostalgia/toys';
+import { extraGroups } from '../data/nostalgia/extras';
+
+const now = new Date();
+const year = now.getFullYear();
+const dateCN = `${year} 年 ${now.getMonth() + 1} 月`;
+const extraCount = extraGroups.reduce((total, group) => total + group.items.length, 0);
+
+const heroStats = [
+  { label: '建站', value: '2026' },
+  { label: '覆盖年份', value: '1980—2009' },
+  { label: '页面', value: '9 个' },
+  { label: '评论系统', value: 'Twikoo · 待接入' },
+];
+
+const inventory = [
+  { label: '时光轴大事记', value: eventStats.total, unit: '条' },
+  { label: '华语金曲', value: songs.length, unit: '首' },
+  { label: '书单', value: books.length, unit: '本' },
+  { label: '影视条目', value: movies.length, unit: '部' },
+  { label: '老物件展品', value: toys.length, unit: '件' },
+  { label: '后厅藏品', value: extraCount, unit: '件' },
+];
+
+const credits = [
+  {
+    title: '文字与年份',
+    body: '站内文案由编辑撰写整理，年份以作品的首播、发行或上市年份为准。不同地区对同一件东西的叫法差别很大，我们在别名里尽量多收了几种，但不可能穷尽——你那儿叫什么，欢迎补充。',
+  },
+  {
+    title: '封面与插画',
+    body: '所有封面都由程序按标题和年份生成，不使用图库图片，也没有任何外部图片请求。同一件作品每次生成的图案都一样，不会换一张脸。',
+  },
+  {
+    title: '引用与版权',
+    body: '歌词、台词、书名引用都控制在 25 字以内，只用于评论和说明。音乐、影视的完整版权归原作者与出品方所有，本站不提供音视频下载或在线播放。',
+  },
+  {
+    title: '纠错与删除',
+    body: '如果发现年份、人物或事实有误，请直接去留言板指出，核实后会修改。若涉及版权问题，向来信说明，我们会删除相应内容。',
+  },
+  {
+    title: '隐私',
+    body: '这是一个纯静态网站：没有统计脚本、没有 cookie、没有账号系统。留言板接入 Twikoo 后，评论数据会保存在你自己部署的后端里。',
+  },
+];
+
+const stack = [
+  { key: '框架', value: 'Astro 5 · 静态输出，不带前端框架运行时' },
+  { key: '样式', value: 'Tailwind CSS v4 + 自定义设计 token（旧纸、油墨、朱红、胶带）' },
+  { key: '交互', value: '原生 TypeScript：筛选、搜索、滚动入场、键盘快捷键「/」' },
+  { key: '动效', value: '只做滚动入场和少量 hover；全部尊重 prefers-reduced-motion' },
+  { key: '封面', value: '程序化生成（hash → 配色与纹理），不依赖外部图片' },
+  {
+    key: '3D',
+    value: 'three.js 只用在首页 Hero 的星空时间隧道：动态 import，reduced-motion 时跳过，不可用时降级为静态星空；其余页面不加载',
+  },
+  { key: '留言板', value: 'Twikoo 预留；未配置环境 ID 时不发起任何请求' },
+  { key: '字体', value: '系统宋体 / 苹方 / 等宽字体，不外链字体文件' },
+];
+
+const craftNotes = [
+  {
+    title: '为什么全是字',
+    body: '文字比图片耐旧。一张九十年代的模糊照片，可能还没一句「马兰开花二十一」更能把你带回那个课间。',
+  },
+  {
+    title: '为什么不做动效大片',
+    body: '怀旧不是特效。页面安静一点，你才听得见磁带底噪。动效只在进入视口时发生一次，不抢内容。',
+  },
+  {
+    title: '三种宽度',
+    body: '1440 / 768 / 390 三种宽度逐一检查过，没有横向滚动。移动端优先，是因为很多人是在睡前躺着刷到这里的。',
+  },
+  {
+    title: '关于错字',
+    body: '校对做了很多轮，但记忆和资料都会出错。发现不对的地方，留言板比邮件更快，我们改得也更快。',
+  },
+];
+
+const changelog = [
+  {
+    date: '2026.10',
+    tag: '上线',
+    title: '九个页面正式上线',
+    note: '首页、时光轴、音乐、书籍、影视、老物件、时光机、关于，以及 404 页。视觉系统统一为旧纸、油墨与朱红，全部页面适配移动端，无外部图片与字体请求。',
+  },
+  {
+    date: '2026.10',
+    tag: '数据',
+    title: '补齐 1980—2009 的内容',
+    note: '大事记、华语金曲、书单、影视条目与老物件陆续完成编写和校对。老物件的别名、玩法步骤与私人记忆按地区差异尽量收录。',
+  },
+  {
+    date: '2026.10',
+    tag: '无障碍',
+    title: '筛选、搜索与动效',
+    note: '全站筛选搜索使用原生 TypeScript，支持「/」键聚焦搜索；滚动入场、展开和 hover 动效都尊重 prefers-reduced-motion。',
+  },
+  {
+    date: '下一步',
+    tag: '待办',
+    pending: true,
+    title: '留言板与音频片段',
+    note: '部署 Twikoo 后端并填写环境 ID 后，留言板即可启用。音频片段要等版权问题解决后才会加入，在那之前不提供试听。',
+  },
+  {
+    date: '下一步',
+    tag: '待办',
+    pending: true,
+    title: '继续校对年份与叫法',
+    note: '收录标准是「不确定的宁可不写」，所以仍有一些条目在核对中。发现错误请留言，比猜测有用。',
+  },
+];
+---
+<BaseLayout
+  title="关于"
+  description="流金岁月 · 时光机是一台不插电的时光机：写给 80 后、90 后的一封信，站点缘起、内容板块、数据与版权声明、技术栈和更新日志。"
+>
+  <!-- 卷宗首屏 -->
+  <section class="relative">
+    <div class="mx-auto max-w-7xl px-4 pt-10 sm:px-6 sm:pt-16 lg:px-8">
+      <div class="relative border-[1.5px] border-ink bg-cream shadow-print">
+        <div class="grid lg:grid-cols-[1.32fr_0.68fr]">
+          <div class="relative p-6 sm:p-9 lg:p-11">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-[1.5px] border-dashed border-ink/25 pb-3 font-mono text-[9px] tracking-[0.22em] text-ink-faint">
+              <span class="text-vermilion">FILE 07 / COLOPHON</span>
+              <span>{dateCN} 最后更新</span>
+            </div>
+
+            <h1 class="mt-7 font-display text-[clamp(2.2rem,5.2vw,3.7rem)] leading-[1.05] tracking-tight text-ink text-balance">
+              关于这台<br class="sm:hidden" />时光机
+            </h1>
+            <p class="mt-5 max-w-xl text-[15px] leading-8 text-ink-soft text-pretty">
+              它不是真的能穿越。它只是一个把名字、年份和细节重新写一遍的地方——写给还记得这些东西的人，也写给有一天会忘记的人。
+            </p>
+
+            <div class="mt-7 flex flex-wrap items-center gap-3">
+              <a href="#letter" class="btn-retro">读这封信</a>
+              <a
+                href="#comments"
+                class="inline-flex items-center gap-2 border-b border-ink/30 pb-1 font-mono text-[10px] tracking-[0.16em] text-ink-soft transition-colors hover:border-vermilion hover:text-vermilion"
+              >
+                直接去留言板 <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+
+            <dl class="mt-9 flex flex-wrap gap-x-8 gap-y-2.5 border-t border-dashed border-ink/20 pt-4 font-mono text-[10px] tracking-[0.14em]">
+              {
+                heroStats.map((item) => (
+                  <div class="flex items-baseline gap-2">
+                    <dt class="text-ink-faint">{item.label}</dt>
+                    <dd class="font-bold text-ink">{item.value}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+          </div>
+
+          <aside class="relative border-t-[1.5px] border-ink bg-paper-deep p-6 sm:p-8 lg:border-l-[1.5px] lg:border-t-0">
+            <div class="pointer-events-none absolute inset-0 opacity-40 dot-grid" aria-hidden="true"></div>
+            <div class="relative flex h-full flex-col">
+              <p class="label-mono text-ink-faint">档案摘要</p>
+              <dl class="mt-4 divide-y divide-ink/10 font-mono text-[11px]">
+                {
+                  inventory.map((item) => (
+                    <div class="flex items-baseline justify-between gap-3 py-2.5">
+                      <dt class="text-ink-soft">{item.label}</dt>
+                      <dd class="text-ink">
+                        {item.value}
+                        <span class="ml-0.5 text-[9px] text-ink-faint">{item.unit}</span>
+                      </dd>
+                    </div>
+                  ))
+                }
+              </dl>
+              <p class="mt-4 text-[11px] leading-6 text-ink-faint">
+                完整收录数量见下方「数据与版权」。数字会随内容更新自动变化。
+              </p>
+              <div class="mt-auto flex items-end justify-between gap-4 pt-8">
+                <p class="max-w-[9rem] font-mono text-[8px] leading-5 tracking-[0.16em] text-ink-faint">
+                  本档案由编辑手工维护
+                  <br />
+                  不设自动抓取
+                </p>
+                <Seal sub="SINCE 1980" />
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 一封信 -->
+  <section id="letter" class="scroll-mt-20 py-16 sm:py-20">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <Reveal>
+        <article class="relative border-[1.5px] border-ink bg-cream shadow-print bg-paper-texture">
+          <div class="absolute inset-y-8 left-6 hidden w-px bg-vermilion/25 sm:block" aria-hidden="true"></div>
+          <div class="relative p-6 sm:py-10 sm:pl-12 sm:pr-10 lg:py-12 lg:pl-16 lg:pr-14">
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b-[1.5px] border-dashed border-ink/25 pb-4 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+              <span class="text-vermilion">流金岁月 · 编辑部</span>
+              <span>VOL.05</span>
+              <span>{dateCN}</span>
+            </div>
+
+            <h2 class="mt-8 font-display text-[clamp(1.75rem,4.2vw,2.6rem)] leading-tight tracking-tight text-ink">
+              写给还在翻旧东西的你
+            </h2>
+
+            <div class="mt-6 space-y-4 text-[15px] leading-8 text-ink-soft [&>p]:indent-8 text-pretty">
+              <p>
+                如果你点进这一页，大概率是先想起了一件很小的事：抽屉最里面那盒磁带，塑料壳裂了一道缝，歌词纸被翻得起了毛边；或者文具盒盖内侧贴过的贴纸，撕下来时留了一块洗不掉的胶印。
+              </p>
+              <p>
+                我们把 1980 到 2009 年之间的东西，做成了这个网站。不是要证明过去更好——过去当然不更好：没有外卖，没有导航，打一个长途电话要去邮局排队，电视只有几个台，星期二下午还常常停播。我们只是觉得，那些东西正以很快的速度从语言里消失。再过几年，你可能会突然想不起「万能充」叫什么，想不起跳皮筋的口诀第二句。
+              </p>
+              <p>
+                所以这里收录的每一条，都尽量写得具体：哪一年、多少钱、在哪儿买、怎么玩、坏了怎么修。具体的东西不容易被忘掉。
+              </p>
+              <p>
+                我们也没有把记忆修得太干净。小卖部的辣条吃完要舔手指，四驱车冲进下水道就再也找不回来，小霸王被家长锁进柜子——这些都在。回忆不是一张磨皮过度的照片，它有噪点，有划痕，有时候还有一点不甘心。
+              </p>
+              <p>
+                这个站会一直更新。数据来自公开资料和我们自己的记忆，难免有错。如果你发现哪一年写错了，或者某件东西在你们那儿根本不是这个叫法，欢迎去页面底部的留言板说一声。我们想知道。
+              </p>
+              <p>
+                页面没有广告，不收集你的信息，也不会弹窗劝你关注什么。你可以随便逛逛，看完关掉。如果某一页让你停下来多看了两分钟，这个站就算做成了。
+              </p>
+              <p>最后，谢谢你还记得这些东西。</p>
+            </div>
+
+            <div class="relative mt-5 flex justify-end">
+              <p class="-rotate-1 font-mono text-[10px] leading-5 tracking-wide text-vermilion/80">
+                ※ 这里说的「我们」，其实只有一个人。
+              </p>
+            </div>
+
+            <div class="mt-10 flex flex-wrap items-end justify-between gap-6 border-t-[1.5px] border-dashed border-ink/25 pt-7">
+              <div>
+                <p class="font-display text-xl leading-tight text-ink">流金岁月编辑部</p>
+                <p class="mt-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-faint">{dateCN}</p>
+              </div>
+              <Seal />
+            </div>
+          </div>
+        </article>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- 内容板块 -->
+  <section id="sections" class="relative scroll-mt-20 py-16 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <SectionHeader
+          index="02"
+          eyebrow="Sections"
+          title="六个板块，一条时间线"
+          description="六个页面各自负责一种记忆：大事记、旋律、文字、影像、旧物，以及一个可以输入出生年份的时光机。它们互相独立，又都指向同一段时间。"
+        />
+      </Reveal>
+      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          sections.map((section, index) => (
+            <Reveal delay={(index % 3) * 70}>
+              <a
+                href={section.href}
+                class="group relative flex h-full flex-col border-[1.5px] border-ink bg-cream p-5 shadow-print transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-ink)]"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span class="font-mono text-[10px] font-bold tracking-[0.3em] text-ink-faint">{section.index}</span>
+                  <span class="font-mono text-[9px] tracking-[0.2em] text-vermilion">{section.en}</span>
+                </div>
+                <p class="mt-4 font-display text-2xl leading-tight text-ink">{section.title}</p>
+                <p class="mt-2 flex-1 text-sm leading-7 text-ink-soft">{section.description}</p>
+                <span class="mt-4 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-ink-faint transition-colors group-hover:text-vermilion">
+                  去看看 <span aria-hidden="true">→</span>
+                </span>
+              </a>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 数据与版权 -->
+  <section id="data" class="relative scroll-mt-20 border-y-[1.5px] border-ink/15 bg-paper-deep/60 py-16 sm:py-24">
+    <div class="pointer-events-none absolute inset-0 opacity-40 bg-paper-texture" aria-hidden="true"></div>
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <SectionHeader
+          index="03"
+          eyebrow="Data & Credits"
+          title="数据与版权"
+          accent="jade"
+          description="所有内容都能追溯到公开资料或具体记忆。这里把收录标准、引用范围和纠错方式一次说清楚。"
+        />
+      </Reveal>
+      <div class="mt-10 grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <Reveal>
+          <div class="border-[1.5px] border-ink bg-cream p-6 shadow-print sm:p-7">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-ink/20 pb-3 font-mono text-[9px] tracking-[0.22em] text-ink-faint">
+              <span>CONTENT INVENTORY</span>
+              <span>截至 {dateCN}</span>
+            </div>
+            <dl class="mt-4 divide-y divide-ink/10">
+              {
+                inventory.map((item) => (
+                  <div class="flex items-baseline justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-ink-soft">{item.label}</dt>
+                    <dd class="font-display text-xl leading-none text-ink">
+                      {item.value}
+                      <span class="ml-1 font-mono text-[9px] tracking-widest text-ink-faint">{item.unit}</span>
+                    </dd>
+                  </div>
+                ))
+              }
+            </dl>
+            <p class="mt-4 border-t border-dashed border-ink/20 pt-3 font-mono text-[9px] leading-5 tracking-[0.12em] text-ink-faint">
+              数字由数据文件自动统计，随内容更新变化。
+              <br />
+              收录标准：真实存在、能说清细节、不编造年份。
+            </p>
+          </div>
+        </Reveal>
+
+        <div class="space-y-6">
+          {
+            credits.map((credit, index) => (
+              <Reveal delay={index * 50}>
+                <article class="border-l-[3px] border-vermilion/60 pl-4 sm:pl-5">
+                  <h3 class="font-display text-lg leading-snug text-ink">{credit.title}</h3>
+                  <p class="mt-1.5 text-sm leading-7 text-ink-soft text-pretty">{credit.body}</p>
+                </article>
+              </Reveal>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技术栈 -->
+  <section id="stack" class="relative scroll-mt-20 py-16 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Reveal>
+        <SectionHeader
+          index="04"
+          eyebrow="Build Sheet"
+          title="这台机器是怎么造的"
+          accent="mustard"
+          description="没有后端，没有数据库，没有前端框架。构建产物是一堆静态 HTML，放在任何能放文件的地方就能打开。"
+        />
+      </Reveal>
+
+      <div class="mt-10 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+        <Reveal>
+          <div class="overflow-hidden border-[1.5px] border-ink bg-night text-cream shadow-print">
+            <div class="flex items-center justify-between border-b border-cream/15 px-4 py-2.5 font-mono text-[9px] tracking-[0.2em] text-cream/40">
+              <span>BUILD NOTES</span>
+              <span class="flex items-center gap-1.5" aria-hidden="true">
+                <span class="h-2 w-2 rounded-full bg-vermilion/70"></span>
+                <span class="h-2 w-2 rounded-full bg-mustard/70"></span>
+                <span class="h-2 w-2 rounded-full bg-jade/70"></span>
+              </span>
+            </div>
+            <dl class="divide-y divide-cream/10">
+              {
+                stack.map((item) => (
+                  <div class="grid grid-cols-[4.5rem_1fr] gap-4 px-5 py-3.5 sm:grid-cols-[5.5rem_1fr]">
+                    <dt class="font-mono text-[9px] tracking-[0.2em] text-cream/35">{item.key}</dt>
+                    <dd class="text-[13px] leading-6 text-cream/75">{item.value}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+            <div class="border-t border-cream/15 px-5 py-4 font-mono text-[9px] leading-6 tracking-[0.14em] text-cream/30">
+              <p><span class="text-mustard">$</span> pnpm build</p>
+              <p class="mt-1"><span class="text-jade-soft">✓</span> 输出纯静态 HTML · 无需服务端 · 可离线归档</p>
+            </div>
+          </div>
+        </Reveal>
+
+        <div class="grid content-start gap-4 sm:grid-cols-2">
+          {
+            craftNotes.map((note, index) => (
+              <Reveal delay={index * 60}>
+                <article class="flex h-full flex-col border-[1.5px] border-ink bg-cream p-5 shadow-print-sm">
+                  <span class="font-mono text-[9px] tracking-[0.24em] text-vermilion">
+                    NOTE {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="mt-2.5 font-display text-lg leading-snug text-ink">{note.title}</h3>
+                  <p class="mt-2 text-[13px] leading-6 text-ink-soft">{note.body}</p>
+                </article>
+              </Reveal>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 更新日志 -->
+  <section id="changelog" class="relative scroll-mt-20 border-t-[1.5px] border-ink/15 bg-paper-deep/40 py-16 sm:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <Reveal>
+        <SectionHeader
+          index="05"
+          eyebrow="Changelog"
+          title="更新日志"
+          accent="sky"
+          description="改动会记在这里。日期是真实的，待办也是真的待办。"
+        />
+      </Reveal>
+      <div class="mt-10 border-[1.5px] border-ink bg-cream p-6 shadow-print sm:p-8">
+        <Changelog entries={changelog} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 去逛逛 -->
+  <section class="mx-auto max-w-5xl px-4 pt-14 sm:px-6 sm:pt-16">
+    <div class="flex flex-col gap-6 border-[1.5px] border-ink bg-cream p-6 shadow-print sm:flex-row sm:items-center sm:justify-between sm:p-7">
+      <div>
+        <p class="label-mono text-vermilion">Continue</p>
+        <p class="mt-1.5 font-display text-2xl leading-tight text-ink">信看完了，去挑一个入口</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {
+          sections.map((section) => (
+            <a
+              href={section.href}
+              class="border-[1.5px] border-ink/30 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.12em] text-ink-soft transition-colors hover:border-ink hover:bg-mustard hover:text-ink"
+            >
+              {section.title}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 留言板 -->
+  <div class="mx-auto max-w-4xl px-4 pb-8 pt-14 sm:px-6">
+    <Comment />
+  </div>
+</BaseLayout>

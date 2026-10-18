@@ -1,0 +1,25 @@
+---
+/**
+ * 落款印章：朱红方印 + 2×2 竖排文字，用于关于页署名。
+ */
+interface Props {
+  text?: string;
+  sub?: string;
+  class?: string;
+}
+
+const { text = '流金岁月', sub = '1980 — 2009', class: className = '' } = Astro.props;
+const chars = Array.from(text).slice(0, 4);
+---
+<div class:list={['inline-flex flex-col items-center gap-2', className]}>
+  <div
+    class="relative grid h-[4.75rem] w-[4.75rem] grid-cols-2 place-items-center border-[3px] border-vermilion/85 p-1.5 text-vermilion"
+    style="transform:rotate(-6deg);"
+    aria-hidden="true"
+  >
+    {chars.map((char) => <span class="font-display text-[1.3rem] leading-none">{char}</span>)}
+    <span class="pointer-events-none absolute inset-0 grain opacity-40"></span>
+  </div>
+  <span class="font-mono text-[8px] tracking-[0.2em] text-ink-faint">{sub}</span>
+  <span class="sr-only">{text}印章</span>
+</div>

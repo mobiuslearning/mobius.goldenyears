@@ -1,0 +1,345 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/shared/SectionHeader.astro';
+import Reveal from '../components/shared/Reveal.astro';
+import BookCard from '../components/culture/books/BookCard.astro';
+import FeaturedBookShelf from '../components/culture/books/FeaturedBookShelf.astro';
+import { books } from '../data/culture/books';
+import { eraOfYear } from '../lib/theme';
+import type { BookCategory, BookCountry } from '../types';
+
+const eraOrder = ['1980s', '1990s', '2000s'] as const;
+const eras = eraOrder.filter((era) => books.some((book) => eraOfYear(book.year) === era));
+const countryOrder: BookCountry[] = ['中国', '港台', '欧美', '日韩', '其他'];
+const countries = countryOrder.filter((country) => books.some((book) => book.country === country));
+const categoryOrder: BookCategory[] = [
+  '文学',
+  '小说',
+  '科幻',
+  '武侠',
+  '青春',
+  '漫画',
+  '科普',
+  '历史',
+  '绘本',
+  '其他',
+];
+const categories = categoryOrder.filter((category) => books.some((book) => book.category === category));
+
+const featuredBooks = books.filter((book) => book.featured);
+const heroBooks = (featuredBooks.length ? featuredBooks : books).slice(0, 3);
+const ticker = books.slice(0, 10).map((book) => `${book.title} · ${book.author}`);
+const tickerItems = ticker.length ? [...ticker, ...ticker] : ['馆藏整理中 · 请稍候', '馆藏整理中 · 请稍候'];
+
+const chipClass =
+  'border-[1.5px] border-ink/25 bg-cream px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] text-ink-soft transition-colors hover:border-ink';
+---
+
+<BaseLayout
+  title="书籍"
+  description="课桌底下、被窝里、图书馆角落读完的那些书：从《平凡的世界》到《哈利·波特》，按年代、国家、类别翻阅这份青春书单。"
+>
+  <script>
+    import '../scripts/books';
+  </script>
+
+  <!-- ============================ Hero：借书卡与书架 ============================ -->
+  <section class="relative overflow-hidden border-b-[1.5px] border-ink bg-paper-deep">
+    <div class="pointer-events-none absolute inset-0 opacity-[0.35] line-grid" aria-hidden="true"></div>
+    <div
+      class="pointer-events-none absolute -left-6 top-6 select-none font-display text-[13rem] leading-none text-ink/[0.05] sm:text-[18rem]"
+      aria-hidden="true"
+    >
+      书
+    </div>
+
+    <div class="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 sm:pb-16 sm:pt-16 lg:px-8">
+      <div class="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr]">
+        <div>
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="font-mono text-[11px] font-bold tracking-[0.3em] text-mustard">03 / BOOKS</span>
+            <span class="h-px w-10 bg-ink/30" aria-hidden="true"></span>
+            <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-faint">Open Stacks</span>
+          </div>
+
+          <h1 class="mt-4 font-display text-[clamp(2.6rem,7vw,4.6rem)] leading-[1.03] tracking-tight text-ink">
+            课桌底下<br />读完的书
+          </h1>
+
+          <p class="mt-5 max-w-xl text-[15px] leading-8 text-ink-soft text-pretty">
+            借书卡上盖满日期，书页里有铅笔画的线和借给下一个人时写的小纸条。从《平凡的世界》到《哈利·波特》，这些书在课桌下、被窝里、图书馆的角落被一页页翻旧。
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-2">
+            <span class="stamp text-vermilion">开架借阅</span>
+            <span class="stamp text-jade">1980—2009</span>
+            <span class="font-mono text-[10px] tracking-[0.16em] text-ink-faint">在架 {books.length} 种 · 借期 30 天</span>
+          </div>
+
+          <!-- 借书卡 -->
+          <div class="relative mt-8 max-w-sm -rotate-[1.2deg] border-[1.5px] border-ink bg-cream p-4 shadow-print">
+            <div class="flex items-center justify-between border-b-[1.5px] border-ink pb-2">
+              <span class="label-mono text-vermilion">借书卡 · Borrower's Card</span>
+              <span class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">NO. 0397</span>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-3 font-mono text-[9px] tracking-[0.08em]">
+              <p><span class="text-ink-faint">姓名</span> <span class="ml-1 border-b border-dotted border-ink/40 pr-6">（自己填）</span></p>
+              <p><span class="text-ink-faint">班级</span> <span class="ml-1 border-b border-dotted border-ink/40 pr-6">二年三班</span></p>
+            </div>
+            <div class="mt-3 border-t border-ink/15 pt-2">
+              <div class="flex items-center justify-between font-mono text-[8px] tracking-[0.16em] text-ink-faint">
+                <span>DATE DUE · 应还日期</span>
+                <span>逾期每天 2 分</span>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <span class="stamp text-vermilion">1987.03.12</span>
+                <span class="stamp text-jade">1993.06.01</span>
+                <span class="stamp text-mustard">2001.09.15</span>
+              </div>
+            </div>
+            <p class="mt-3 font-display text-[12px] italic leading-5 text-ink-soft">
+              「书非借不能读也。」
+              <span class="ml-1 font-mono text-[8px] not-italic tracking-wider text-ink-faint">— 袁枚《黄生借书说》</span>
+            </p>
+          </div>
+        </div>
+
+        <Reveal direction="scale" class="relative">
+          {
+            heroBooks.length ? (
+              <FeaturedBookShelf books={heroBooks} />
+            ) : (
+              <div class="grid min-h-64 place-items-center border-[1.5px] border-dashed border-ink/40 bg-cream/60 p-8 text-center">
+                <p class="font-display text-lg text-ink-soft">书架暂时空着，正在从仓库调书。</p>
+              </div>
+            )
+          }
+        </Reveal>
+      </div>
+    </div>
+
+    <!-- 报纸式滚动书讯 -->
+    <div class="relative overflow-hidden border-t-[1.5px] border-ink bg-ink py-2 text-cream">
+      <div class="marquee-track">
+        {
+          tickerItems.map((item) => (
+            <span class="mx-5 inline-flex items-center gap-5 whitespace-nowrap font-mono text-[10px] tracking-[0.26em] text-cream/60">
+              <span>{item}</span>
+              <span class="h-1 w-1 rounded-full bg-mustard" aria-hidden="true" />
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 开架书库 ============================ -->
+  <section id="shelf" class="relative py-16 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeader
+          index="SHELF"
+          eyebrow="Open Stacks"
+          title="开架书库"
+          description="按年代、国家、类别随便翻。也可以搜书名、作者，或者一句你还记得的话。"
+          accent="mustard"
+        />
+        <Reveal class="shrink-0">
+          <p class="border-[1.5px] border-ink bg-cream px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-soft shadow-print-sm">
+            在架 <span class="text-vermilion">{books.length}</span> 种 · 全部开架
+          </p>
+        </Reveal>
+      </div>
+
+      <div class="mt-10" data-collection>
+          <!-- 借阅登记台 -->
+          <div class="border-[1.5px] border-ink bg-cream shadow-print">
+            <div class="flex flex-col gap-4 border-b border-ink/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div>
+                <p class="label-mono text-vermilion">Borrowing Desk · 借阅登记台</p>
+                <p class="mt-1 text-sm text-ink-soft">挑年代、挑国家、挑类别，或者在检索口写一个词。</p>
+              </div>
+              <div class="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                <label class="relative block">
+                  <span class="sr-only">搜索书籍</span>
+                  <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[9px] tracking-[0.14em] text-ink-faint">SEARCH</span>
+                  <input
+                    type="search"
+                    data-search-input
+                    placeholder="书名 / 作者 / 一句话"
+                    class="w-full border-[1.5px] border-ink bg-cream py-2 pl-[4.5rem] pr-8 font-body text-sm text-ink placeholder:text-ink-faint/70 focus:outline-none focus:ring-0 sm:w-64"
+                  />
+                  <kbd class="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 border border-ink/20 px-1 font-mono text-[9px] text-ink-faint sm:block">/</kbd>
+                </label>
+                <div class="flex items-center gap-2">
+                  <button type="button" data-book-random class="btn-retro shrink-0 px-3 py-2 text-[11px]">
+                    抽一本
+                  </button>
+                  <span data-random-hint role="status" aria-live="polite" class="max-w-40 font-mono text-[9px] leading-4 tracking-wider text-vermilion"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-4 p-4 sm:p-5 lg:grid-cols-3">
+              <div>
+                <p class="label-mono text-[9px] text-ink-faint">年代 · ERA</p>
+                <div class="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="按年代筛选">
+                  <button type="button" class={chipClass} data-filter data-filter-key="era" data-filter-value="all">全部</button>
+                  {
+                    eras.map((era) => (
+                      <button type="button" class={chipClass} data-filter data-filter-key="era" data-filter-value={era}>
+                        {era}
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+              <div>
+                <p class="label-mono text-[9px] text-ink-faint">国家 · Country</p>
+                <div class="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="按国家筛选">
+                  <button type="button" class={chipClass} data-filter data-filter-key="country" data-filter-value="all">全部</button>
+                  {
+                    countries.map((country) => (
+                      <button type="button" class={chipClass} data-filter data-filter-key="country" data-filter-value={country}>
+                        {country}
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+              <div>
+                <p class="label-mono text-[9px] text-ink-faint">类别 · Category</p>
+                <div class="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="按类别筛选">
+                  <button type="button" class={chipClass} data-filter data-filter-key="category" data-filter-value="all">全部</button>
+                  {
+                    categories.map((category) => (
+                      <button type="button" class={chipClass} data-filter data-filter-key="category" data-filter-value={category}>
+                        {category}
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-ink/15 px-4 py-2.5 font-mono text-[10px] tracking-[0.14em] text-ink-faint sm:px-5">
+              <span>检索结果 <span class="text-vermilion" data-result-count>{books.length}</span> / {books.length} 种</span>
+              <span class="hidden sm:inline">按「/」快速搜索</span>
+            </div>
+          </div>
+
+          <!-- 书墙 -->
+          <div data-shelf-frame class="relative mt-8 border-[1.5px] border-ink bg-paper-deep/70 p-3 shadow-print-sm sm:p-5">
+            <div class="pointer-events-none absolute inset-0 opacity-40 line-grid" aria-hidden="true"></div>
+            <div
+              class="relative grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-10 lg:grid-cols-4"
+            >
+              {
+                books.map((book, index) => <BookCard book={book} index={index} />)
+              }
+            </div>
+          </div>
+
+          <!-- 空状态 -->
+          <div
+            data-empty
+            hidden
+            class="mt-8 border-[1.5px] border-dashed border-ink/40 bg-paper-deep/60 px-6 py-16 text-center"
+          >
+            <p class="font-display text-2xl text-ink">这张借书卡上还没有书名</p>
+            <p class="mx-auto mt-3 max-w-md text-sm leading-7 text-ink-soft">
+              换一个年代、国家或类别试试；搜索词也可以写短一点，比如只写作者的名字。
+            </p>
+            <span class="stamp mt-6 inline-block text-ink-faint">NO RECORD FOUND</span>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 结尾引导 ============================ -->
+  <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+    <Reveal>
+      <div class="relative overflow-hidden border-[1.5px] border-ink bg-ink px-6 py-12 text-cream grain sm:px-10 sm:py-14">
+        <div class="pointer-events-none absolute -right-6 -top-10 select-none font-display text-[11rem] leading-none text-cream/[0.04]" aria-hidden="true">
+          还
+        </div>
+        <div class="relative grid gap-8 md:grid-cols-[1.15fr_1fr] md:items-center">
+          <div>
+            <p class="label-mono text-mustard">Return Desk · 还书之后</p>
+            <h2 class="mt-3 font-display text-[clamp(1.9rem,4.4vw,2.9rem)] leading-tight text-cream">合上书，天还没黑</h2>
+            <p class="mt-4 max-w-lg text-sm leading-7 text-cream/60">
+              把书放回书架，电视里正好开始放片头曲。那年头的晚上，总是这样接上的。
+            </p>
+            <div class="mt-6 flex flex-wrap gap-2">
+              <span class="stamp text-cream/50">馆藏 1980—2009</span>
+              <span class="stamp text-mustard">请勿折页</span>
+            </div>
+          </div>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <a
+              href="/movies/"
+              class="group border-[1.5px] border-cream/25 bg-night-soft px-4 py-3 transition-colors hover:border-mustard"
+            >
+              <span class="block font-mono text-[9px] tracking-[0.24em] text-cream/40">Next · 04</span>
+              <span class="mt-1 flex items-center justify-between font-display text-lg text-cream">
+                影视 · 录像厅
+                <span class="font-mono text-xs text-mustard transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+              </span>
+            </a>
+            <a
+              href="/music/"
+              class="group border-[1.5px] border-cream/25 bg-night-soft px-4 py-3 transition-colors hover:border-mustard"
+            >
+              <span class="block font-mono text-[9px] tracking-[0.24em] text-cream/40">Listen · 02</span>
+              <span class="mt-1 flex items-center justify-between font-display text-lg text-cream">
+                音乐 · 卡带
+                <span class="font-mono text-xs text-mustard transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+              </span>
+            </a>
+            <a
+              href="/timeline/"
+              class="group border-[1.5px] border-cream/25 bg-night-soft px-4 py-3 transition-colors hover:border-mustard sm:col-span-2"
+            >
+              <span class="block font-mono text-[9px] tracking-[0.24em] text-cream/40">Rewind · 01</span>
+              <span class="mt-1 flex items-center justify-between font-display text-lg text-cream">
+                时光轴 · 翻回那一年
+                <span class="font-mono text-xs text-mustard transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+  </section>
+</BaseLayout>
+
+
+<style is:global>
+  @keyframes book-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  [data-item].is-filtered-in {
+    animation: book-card-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  [data-item].is-picked {
+    outline: 3px solid var(--color-vermilion);
+    outline-offset: 4px;
+    animation: book-card-in 0.35s ease both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-item].is-filtered-in,
+    [data-item].is-picked {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,176 @@
+---
+import type { Song } from '../../../types';
+import { site } from '../../../data/site';
+
+interface Props {
+  total: number;
+  featuredCount: number;
+  regions: string[];
+  span: string;
+  nowPlaying: Song[];
+}
+
+const { total, featuredCount, regions, span, nowPlaying } = Astro.props;
+
+const stats = [
+  { label: 'TRACKS', sub: '收录曲目', value: String(total).padStart(2, '0'), size: 'text-3xl' },
+  { label: 'SPAN', sub: '年份跨度', value: span, size: 'text-lg whitespace-nowrap sm:text-xl' },
+  { label: 'FEATURED', sub: '精选金曲', value: String(featuredCount).padStart(2, '0'), size: 'text-3xl' },
+  { label: 'REGIONS', sub: '地区', value: String(regions.length).padStart(2, '0'), size: 'text-3xl' },
+];
+
+const ticker = nowPlaying.length ? nowPlaying : [];
+---
+
+<section class="grain relative overflow-hidden border-b-[1.5px] border-ink bg-night text-cream">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.07] line-grid" aria-hidden="true"></div>
+  <div
+    class="pointer-events-none absolute -left-24 top-1/3 h-[26rem] w-[26rem] rounded-full"
+    style="background: radial-gradient(circle, rgba(209,156,55,0.22), transparent 65%);"
+    aria-hidden="true"
+  ></div>
+  <div
+    class="pointer-events-none absolute -right-20 -top-24 h-[30rem] w-[30rem] rounded-full"
+    style="background: radial-gradient(circle, rgba(194,59,42,0.2), transparent 66%);"
+    aria-hidden="true"
+  ></div>
+
+  <span
+    class="pointer-events-none absolute left-3 top-1/2 hidden -translate-y-1/2 font-mono text-[10px] tracking-[0.5em] text-cream/20 lg:block"
+    style="writing-mode: vertical-rl;"
+    aria-hidden="true">COMPILATION · ORIGINAL SOUNDTRACK · 1980—2009</span
+  >
+  <span
+    class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rotate-180 font-mono text-[10px] tracking-[0.5em] text-cream/20 lg:block"
+    style="writing-mode: vertical-rl;"
+    aria-hidden="true">PLAY IT LOUD · SIDE A / SIDE B</span
+  >
+
+  <div class="relative z-10 mx-auto max-w-7xl px-4 pb-14 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:px-8">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="h-px w-8 bg-mustard"></span>
+          <span class="font-mono text-[10px] uppercase tracking-[0.34em] text-mustard">
+            MUSIC · {site.startYear}—{site.endYear}
+          </span>
+        </div>
+
+        <h1 class="mt-5 font-display text-[clamp(2.4rem,6vw,4.4rem)] leading-[1.06] tracking-tight text-cream text-balance">
+          一盘磁带，<br class="sm:hidden" />装下<span class="text-vermilion">二十年</span>
+        </h1>
+
+        <p class="mt-6 max-w-xl text-[15px] leading-8 text-cream/65 text-pretty">
+          录音机、复读机、随身听、MP3，播放器换了四代，磁带里的歌一直没换。这里按年份收着那些前奏一响、副歌就能跟着唱完的歌。
+        </p>
+
+        <dl class="mt-9 grid max-w-xl grid-cols-2 gap-x-4 gap-y-6 border-t border-cream/15 pt-6 sm:grid-cols-4">
+          {
+            stats.map((stat) => (
+              <div class="border-l border-cream/15 pl-3">
+                <dd class:list={['font-mono font-bold leading-none tracking-tight text-cream', stat.size]}>{stat.value}</dd>
+                <dt class="mt-2 font-mono text-[9px] uppercase tracking-[0.24em] text-cream/45">
+                  {stat.label}
+                  <span class="mt-0.5 block font-body text-[11px] tracking-normal text-cream/35">{stat.sub}</span>
+                </dt>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="relative mx-auto w-full max-w-md">
+        <div
+          class="pointer-events-none absolute inset-x-4 top-6 bottom-6 rounded-full"
+          style="background: radial-gradient(circle, rgba(209,156,55,0.24), transparent 62%);"
+          aria-hidden="true"
+        ></div>
+
+        <div class="relative mx-auto aspect-square w-[min(78vw,21rem)] sm:w-[min(60vw,24rem)] lg:w-[min(34vw,28rem)]">
+          <span class="absolute -left-2 top-8 z-20 rotate-[-8deg] border-[1.5px] border-cream/50 px-2 py-1 font-mono text-[9px] tracking-[0.24em] text-cream/70">
+            SIDE A
+          </span>
+          <span class="absolute -right-1 bottom-14 z-20 rotate-[6deg] border-[1.5px] border-mustard/70 px-2 py-1 font-mono text-[9px] tracking-[0.24em] text-mustard">
+            33⅓ RPM
+          </span>
+
+          <div
+            data-vinyl-disc
+            class="absolute inset-0 animate-spin-slow rounded-full border-[5px] border-[#0a0705] shadow-[0_30px_70px_-24px_rgba(0,0,0,0.95)]"
+            style="background: repeating-radial-gradient(circle at 50% 50%, #17110c 0 1.5px, #0d0a07 1.5px 3px, #1c1610 3px 4.5px);"
+          >
+            <div
+              class="absolute inset-0 rounded-full"
+              style="background: conic-gradient(from 35deg, rgba(255,255,255,0.14), transparent 16%, transparent 38%, rgba(255,255,255,0.06) 52%, transparent 66%, rgba(255,255,255,0.12) 82%, transparent);"
+            >
+            </div>
+            <div
+              class="absolute left-1/2 top-1/2 flex h-[40%] w-[40%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-[1.5px] border-cream/25 bg-vermilion text-center shadow-[inset_0_0_0_5px_rgba(34,28,22,0.18)]"
+            >
+              <span class="font-mono text-[7px] font-bold tracking-[0.3em] text-cream/70">SIDE A</span>
+              <span class="mt-1 font-display text-[clamp(0.85rem,2.4vw,1.2rem)] leading-none tracking-[0.1em] text-cream">流金岁月</span>
+              <span class="mt-1.5 font-mono text-[8px] tracking-[0.18em] text-cream/65">{site.startYear}—{site.endYear}</span>
+              <span class="mt-1 font-mono text-[6px] tracking-[0.3em] text-cream/45">33⅓ RPM</span>
+            </div>
+            <span class="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cream/40 bg-night"></span>
+          </div>
+
+          <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="absolute right-[3%] top-0 h-[66%] w-[24%]">
+              <span class="absolute right-[8%] top-0 block h-6 w-6 rounded-full border-[3px] border-cream/40 bg-night-soft shadow-print-sm sm:h-7 sm:w-7"></span>
+              <span class="absolute right-[26%] top-4 block h-[58%] w-[4px] origin-top rotate-[24deg] bg-gradient-to-b from-cream/70 via-cream/45 to-cream/20 sm:top-5 sm:w-[5px]">
+                <span class="absolute left-1/2 top-full block h-6 w-3 -translate-x-1/2 border border-cream/40 bg-night-soft sm:h-7 sm:w-3.5"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex items-center justify-center gap-3">
+          <button type="button" data-vinyl-toggle class="btn-retro" aria-pressed="true" aria-label="暂停黑胶旋转">
+            <span class="inline-block h-2 w-2 rounded-full bg-vermilion" data-vinyl-dot></span>
+            <span data-vinyl-label>旋转中</span>
+          </button>
+          <span class="font-mono text-[9px] tracking-[0.22em] text-cream/35">33⅓ · STEREO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative z-10 overflow-hidden border-t border-cream/15 bg-night-soft py-3">
+    {
+      ticker.length > 0 ? (
+        <div class="marquee-track items-center">
+          {[0, 1].map((copy) => (
+            <div class="flex shrink-0 items-center gap-8 pr-8" aria-hidden={copy === 1}>
+              <span class="font-mono text-[10px] font-bold tracking-[0.3em] text-mustard">NOW PLAYING</span>
+              {ticker.map((song) => (
+                <span class="flex items-center gap-2 whitespace-nowrap font-mono text-[10px] tracking-[0.16em] text-cream/55">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-vermilion/70"></span>
+                  {song.title}
+                  <span class="text-cream/30">/</span>
+                  {song.artist}
+                  <span class="text-cream/30">{song.year}</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="px-4 text-center font-mono text-[10px] tracking-[0.3em] text-cream/40 sm:px-6 lg:px-8">
+          NOW PLAYING · 歌单录制中
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  [data-vinyl-disc].is-paused {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-vinyl-disc] {
+      animation: none !important;
+    }
+  }
+</style>

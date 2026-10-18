@@ -1,0 +1,190 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/shared/SectionHeader.astro';
+import MusicHero from '../components/culture/music/MusicHero.astro';
+import FeaturedTapes from '../components/culture/music/FeaturedTapes.astro';
+import EraBars from '../components/culture/music/EraBars.astro';
+import MusicFilter from '../components/culture/music/MusicFilter.astro';
+import SongCard from '../components/culture/music/SongCard.astro';
+import { songs } from '../data/culture/music';
+import { eraOfYear } from '../lib/theme';
+import type { MusicRegion, Song } from '../types';
+
+const sorted = [...songs].sort((a, b) => a.year - b.year || a.title.localeCompare(b.title, 'zh'));
+
+const years = sorted.map((song) => song.year);
+const span = years.length ? `${Math.min(...years)}—${Math.max(...years)}` : '—';
+
+const featured = sorted.filter((song) => song.featured);
+const usingFallback = featured.length === 0;
+const tapeSongs = usingFallback ? sorted.slice(0, 6) : featured;
+const nowPlaying = (featured.length ? featured : sorted).slice(0, 8);
+
+const regions = [...new Set(sorted.map((song) => song.region))];
+const regionOrder: MusicRegion[] = ['华语', '港台', '欧美', '日韩', '其他'];
+const regionOptions = regionOrder
+  .filter((region) => regions.includes(region))
+  .map((region) => ({ value: region, label: region }));
+
+const eraLabels: Array<{ value: string; label: string }> = [
+  { value: '1980s', label: '1980s' },
+  { value: '1990s', label: '1990s' },
+  { value: '2000s', label: '2000s' },
+  { value: 'classic', label: '其他年代' },
+];
+const eraPresent = new Set(sorted.map((song) => eraOfYear(song.year)));
+const eraOptions = eraLabels.filter((era) => eraPresent.has(era.value as ReturnType<typeof eraOfYear>));
+
+const genreCounts = [...new Set(sorted.map((song) => song.genre).filter(Boolean))] as string[];
+const genreOptions = genreCounts
+  .map((genre) => ({
+    value: genre,
+    label: genre,
+    count: sorted.filter((song) => song.genre === genre).length,
+  }))
+  .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'zh'))
+  .map(({ value, label }) => ({ value, label }));
+
+const description =
+  '从磁带到 MP3：1980—2009 的华语金曲与时代 BGM。崔健、张学友、王菲、周杰伦……按年代、地区、曲风筛选，搜索那首前奏一响就能跟着唱完的歌。';
+
+const cards = sorted.map((song: Song, i: number) => ({
+  song,
+  index: i + 1,
+  era: eraOfYear(song.year),
+}));
+---
+
+<BaseLayout title="音乐" description={description}>
+  <MusicHero
+    total={songs.length}
+    featuredCount={featured.length}
+    regions={regions}
+    span={span}
+    nowPlaying={nowPlaying}
+  />
+
+  <FeaturedTapes songs={tapeSongs} total={songs.length} usingFallback={usingFallback} />
+
+  <section id="library" class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8">
+    <div class="flex flex-col gap-6 border-t-[1.5px] border-ink/15 pt-14 sm:flex-row sm:items-end sm:justify-between sm:pt-20">
+      <SectionHeader
+        index="02"
+        eyebrow="Track Index"
+        title="按年份翻，像翻磁带内页"
+        description="收录的每一首歌都标了发行年份、地区与曲风。用下面的筛子过一遍，看看哪一年你正在循环哪一盘。"
+        accent="vermilion"
+      />
+      <p class="shrink-0 font-mono text-[10px] tracking-[0.24em] text-ink-faint">
+        ALL TRACKS {String(songs.length).padStart(2, '0')}
+      </p>
+    </div>
+
+    <div class="mt-10 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-8">
+      <div class="lg:sticky lg:top-[4.75rem] lg:self-start">
+        <EraBars songs={sorted} />
+      </div>
+
+      <div class="min-w-0" data-collection>
+        <MusicFilter
+          total={songs.length}
+          eraOptions={eraOptions}
+          regionOptions={regionOptions}
+          genreOptions={genreOptions}
+        />
+
+        {
+          cards.length > 0 ? (
+            <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {cards.map((card) => (
+                <SongCard
+                  song={card.song}
+                  index={card.index}
+                  era={card.era}
+                  delay={(card.index % 4) * 60}
+                />
+              ))}
+            </div>
+          ) : (
+            <div class="mt-6 border-[1.5px] border-dashed border-ink/30 bg-cream/50 px-6 py-16 text-center">
+              <p class="font-display text-2xl text-ink">曲库正在转录</p>
+              <p class="mt-3 text-sm leading-7 text-ink-soft">
+                歌曲还在整理，先去时光轴看看那年发生了什么。
+              </p>
+            </div>
+          )
+        }
+
+        {cards.length > 0 && (
+          <p
+            data-empty
+            hidden
+            class="mt-6 border-[1.5px] border-dashed border-ink/30 bg-cream/60 px-6 py-12 text-center"
+          >
+            <span class="block font-display text-xl text-ink">这一格磁带是空的</span>
+            <span class="mt-2 block text-sm leading-7 text-ink-soft">
+              没有找到符合条件的歌。换个年代，或者把搜索词删掉再翻一遍。
+            </span>
+          </p>
+        )}
+
+        <p class="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[9px] leading-5 tracking-[0.14em] text-ink-faint">
+          <span>歌曲年份以专辑发行年份为准</span>
+          <span class="text-ink/25">/</span>
+          <span>歌词仅节选一句，版权归原作者所有</span>
+          <span class="text-ink/25">/</span>
+          <span>共 {songs.length} 首</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 sm:pb-24 lg:px-8">
+    <div class="relative overflow-hidden border-[1.5px] border-ink bg-night p-8 text-cream shadow-print grain sm:p-12">
+      <div class="pointer-events-none absolute inset-0 opacity-[0.05] line-grid" aria-hidden="true"></div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-3">
+          <span class="h-px w-8 bg-mustard"></span>
+          <span class="font-mono text-[10px] tracking-[0.32em] text-mustard">SIDE B · NEXT</span>
+        </div>
+        <h2 class="mt-4 font-display text-[clamp(1.7rem,3.4vw,2.6rem)] leading-[1.2] text-cream text-balance">
+          这一面听完了，把磁带翻过去
+        </h2>
+        <p class="mt-4 max-w-2xl text-sm leading-7 text-cream/60">
+          歌听到这儿，可以换一个频道：那年电视里播的剧、课桌下传阅的书，还有放学路上攥在手里的玩具。
+        </p>
+        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+          <a
+            href="/timeline/"
+            class="group border-[1.5px] border-cream/25 px-4 py-4 transition-colors hover:border-mustard hover:bg-cream/5"
+          >
+            <span class="font-mono text-[9px] tracking-[0.24em] text-mustard">01 / TIMELINE</span>
+            <span class="mt-2 block font-display text-xl text-cream">时光轴</span>
+            <span class="mt-1 block text-xs leading-6 text-cream/50">1980—2009 的每一年</span>
+          </a>
+          <a
+            href="/books/"
+            class="group border-[1.5px] border-cream/25 px-4 py-4 transition-colors hover:border-mustard hover:bg-cream/5"
+          >
+            <span class="font-mono text-[9px] tracking-[0.24em] text-mustard">02 / BOOKS</span>
+            <span class="mt-2 block font-display text-xl text-cream">书籍</span>
+            <span class="mt-1 block text-xs leading-6 text-cream/50">课桌下偷偷翻过的书</span>
+          </a>
+          <a
+            href="/movies/"
+            class="group border-[1.5px] border-cream/25 px-4 py-4 transition-colors hover:border-mustard hover:bg-cream/5"
+          >
+            <span class="font-mono text-[9px] tracking-[0.24em] text-mustard">03 / MOVIES</span>
+            <span class="mt-2 block font-display text-xl text-cream">影视</span>
+            <span class="mt-1 block text-xs leading-6 text-cream/50">录像厅与全家围坐的夜晚</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/collection';
+    import '../scripts/music';
+  </script>
+</BaseLayout>

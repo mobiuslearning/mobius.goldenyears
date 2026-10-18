@@ -1,0 +1,205 @@
+---
+import type { CoverKind } from '../../lib/theme';
+import { hashString, paletteFor } from '../../lib/theme';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  year?: number | string;
+  kind: CoverKind;
+  seed?: string;
+  image?: string;
+  ratio?: 'square' | 'portrait' | 'landscape';
+  label?: string;
+  class?: string;
+}
+
+const {
+  title,
+  subtitle,
+  year,
+  kind,
+  seed,
+  image,
+  ratio = kind === 'book' || kind === 'movie' ? 'portrait' : 'square',
+  label,
+  class: className = '',
+} = Astro.props;
+
+const palette = paletteFor(seed ?? `${kind}-${title}-${year ?? ''}`, kind);
+const h = hashString(`${kind}-${title}`);
+const rot = (h % 8) - 4;
+const ratioClass =
+  ratio === 'portrait' ? 'aspect-[3/4]' : ratio === 'landscape' ? 'aspect-[4/3]' : 'aspect-square';
+
+const defaultLabel = {
+  music: 'MUSIC',
+  book: 'BOOK',
+  movie: 'FILM',
+  toy: 'OBJECT',
+}[kind];
+---
+
+<figure class={`group/cover @container relative overflow-hidden border-[1.5px] border-ink bg-cream ${ratioClass} ${className}`}>
+  {
+    image ? (
+      <>
+        <img
+          src={image}
+          alt={`${title} 封面`}
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/cover:scale-[1.04]"
+        />
+        <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
+        <span class="absolute inset-x-0 bottom-0 z-10 p-3">
+          <span class="block font-display text-lg leading-tight text-cream">{title}</span>
+          {subtitle && <span class="mt-0.5 block font-mono text-[10px] tracking-widest text-cream/70">{subtitle}</span>}
+        </span>
+      </>
+    ) : (
+      <div class="absolute inset-0" style={`background:linear-gradient(145deg, ${palette.bg} 0%, ${palette.bg2} 100%);`}>
+        {/* 纹理 */}
+        {
+          palette.pattern === 'rays' && (
+            <div
+              class="absolute inset-0 opacity-25"
+              style={`background:repeating-conic-gradient(from 0deg at 70% 20%, ${palette.accent} 0deg 6deg, transparent 6deg 16deg);`}
+            />
+          )
+        }
+        {
+          palette.pattern === 'waves' && (
+            <div
+              class="absolute inset-0 opacity-30"
+              style={`background:repeating-linear-gradient(115deg, ${palette.accent} 0 2px, transparent 2px 14px);`}
+            />
+          )
+        }
+        {
+          palette.pattern === 'grid' && (
+            <div
+              class="absolute inset-0 opacity-20"
+              style={`background-image:linear-gradient(${palette.ink} 1px, transparent 1px), linear-gradient(90deg, ${palette.ink} 1px, transparent 1px); background-size:22px 22px;`}
+            />
+          )
+        }
+        {
+          palette.pattern === 'dots' && (
+            <div
+              class="absolute inset-0 opacity-30"
+              style={`background-image:radial-gradient(${palette.accent} 1.6px, transparent 1.6px); background-size:13px 13px;`}
+            />
+          )
+        }
+        {
+          palette.pattern === 'arc' && (
+            <div
+              class="absolute inset-0 opacity-30"
+              style={`background:repeating-radial-gradient(circle at 30% 85%, transparent 0 18px, ${palette.accent} 18px 19px);`}
+            />
+          )
+        }
+        <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+        <div class="grain absolute inset-0 opacity-30" />
+
+        {/* 类型专属图形 */}
+        {kind === 'music' && (
+          <div
+            class="absolute -right-[18%] top-[14%] h-[78%] w-[78%] rounded-full border border-cream/25"
+            style={`background: repeating-radial-gradient(circle at center, rgba(0,0,0,0.34) 0 1.5px, rgba(255,255,255,0.05) 1.5px 4px), ${palette.bg2}; box-shadow: 0 0 40px rgba(0,0,0,0.45);`}
+          >
+            <div
+              class="absolute left-1/2 top-1/2 flex h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cream/40"
+              style={`background:${palette.accent};`}
+            >
+              <span class="font-mono text-[8px] font-bold tracking-widest" style={`color:${palette.bg2};`}>
+                {String(year ?? '').slice(-2) || '33'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {kind === 'book' && (
+          <>
+            <div class="absolute inset-y-0 left-0 w-[9%] border-r border-cream/25" style={`background:${palette.bg2};`} />
+            <div class="absolute inset-y-4 left-[9%] w-px bg-cream/20" />
+            <div
+              class="absolute right-[12%] top-[10%] max-h-[78%] overflow-hidden font-display text-[clamp(0.6rem,10cqw,1.7rem)] leading-[1.08] tracking-[0.12em]"
+              style={`writing-mode:vertical-rl; color:${palette.ink}; text-shadow:0 1px 0 ${palette.bg2};`}
+            >
+              {title}
+            </div>
+          </>
+        )}
+
+        {kind === 'movie' && (
+          <>
+            <div
+              class="absolute inset-x-0 top-0 h-[7%]"
+              style={`background:repeating-linear-gradient(90deg, #16110d 0 9px, transparent 9px 11px, #16110d 11px 20px);`}
+            />
+            <div
+              class="absolute inset-x-0 bottom-0 h-[7%]"
+              style={`background:repeating-linear-gradient(90deg, #16110d 0 9px, transparent 9px 11px, #16110d 11px 20px);`}
+            />
+            <div class="absolute inset-x-0 top-[7%] h-[86%] bg-ink/25" />
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span
+                class="max-w-[88%] border-y border-cream/40 px-2 py-1.5 text-center font-display text-[clamp(0.8rem,7.2cqw,1.5rem)] leading-tight tracking-wide"
+                style={`color:${palette.ink};`}
+              >
+                {title}
+              </span>
+            </div>
+          </>
+        )}
+
+        {kind === 'toy' && (
+          <>
+            <div
+              class="absolute inset-y-0 left-[58%] w-[3px]"
+              style={`background:repeating-linear-gradient(to bottom, ${palette.ink} 0 6px, transparent 6px 12px);`}
+            />
+            <div class="absolute -left-6 top-[62%] h-3 w-[calc(58%+1.5rem)] -rotate-6" style={`background:${palette.accent};`} />
+            <div class="absolute left-4 top-4 h-14 w-14 rounded-full border-2 border-dashed" style={`border-color:${palette.ink};`} />
+          </>
+        )}
+
+        {/* 文字信息 */}
+        <div class="absolute inset-x-0 bottom-0 z-10 p-3.5 sm:p-4">
+          {kind !== 'book' && kind !== 'movie' && (
+            <span
+              class="block font-display text-[clamp(0.8rem,7.2cqw,1.5rem)] leading-tight"
+              style={`color:${palette.ink}; text-shadow:0 1px 2px rgba(0,0,0,0.3);`}
+            >
+              {title}
+            </span>
+          )}
+          {subtitle && kind !== 'book' && (
+            <span class="mt-1 block font-mono text-[8px] tracking-[0.18em] opacity-80 sm:text-[9px]" style={`color:${palette.ink};`}>
+              {subtitle}
+            </span>
+          )}
+        </div>
+
+        {kind === 'book' && (
+          <span class="absolute bottom-2.5 left-[13%] z-10 max-w-[70%] truncate font-mono text-[clamp(0.42rem,3.4cqw,0.62rem)] tracking-[0.16em]" style={`color:${palette.ink};`}>
+            {subtitle}
+          </span>
+        )}
+
+        {/* 角标 */}
+        <span
+          class="absolute left-0 top-0 z-10 px-2 py-1 font-mono text-[8px] font-bold tracking-[0.22em]"
+          style={`background:${palette.accent}; color:${palette.bg2}; transform: rotate(${rot}deg); transform-origin:top left;`}
+        >
+          {label ?? defaultLabel} {year ?? ''}
+        </span>
+        <span class="absolute right-2 top-2 z-10 font-mono text-[8px] tracking-widest opacity-60" style={`color:${palette.ink};`}>
+          {palette.pattern.toUpperCase()}
+        </span>
+      </div>
+    )
+  }
+</figure>

@@ -1,0 +1,63 @@
+---
+import type { Book } from '../../../types';
+import CoverArt from '../../shared/CoverArt.astro';
+
+interface Props {
+  books: Book[];
+}
+
+const { books } = Astro.props;
+const picks = books.slice(0, 3);
+const tilts = ['-rotate-6', '', 'rotate-6'];
+const lifts = ['translate-y-3', '', 'translate-y-3'];
+---
+
+<div class="relative">
+  <div class="flex items-end justify-center px-2">
+    {
+      picks.map((book, i) => (
+        <div
+          class:list={[
+            'relative w-[33%] max-w-[176px] transition-transform duration-500 ease-out hover:-translate-y-2.5',
+            i === 1 ? 'z-20' : 'z-10',
+            i === 0 ? 'sm:-mr-3' : '',
+            i === 2 ? 'sm:-ml-3' : '',
+            tilts[i],
+            lifts[i],
+          ]}
+        >
+          <div class={i === 1 ? 'shadow-print' : 'shadow-print-sm'}>
+            <CoverArt
+              title={book.title}
+              year={book.year}
+              kind="book"
+              label="BOOK"
+              seed={`hero-${book.id}`}
+            />
+          </div>
+          {i === 1 && (
+            <span class="absolute -right-2 -top-3 z-20 rotate-6 border-[1.5px] border-vermilion bg-cream px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] text-vermilion shadow-print-sm">
+              本周
+            </span>
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- 一块木书架 -->
+  <div
+    class="relative -mt-0.5 h-3.5 border-[1.5px] border-ink bg-[linear-gradient(180deg,#c99d63,#8e6634)] shadow-[0_9px_0_rgba(34,28,22,0.16)]"
+    aria-hidden="true"
+  >
+    <span class="absolute inset-x-3 top-[2px] h-px bg-cream/30"></span>
+  </div>
+
+  <div class="mt-6 flex items-end justify-between gap-3">
+    <div>
+      <p class="font-mono text-[9px] tracking-[0.28em] text-ink-faint">WEEKLY PICKS · 本周上架</p>
+      <p class="mt-1 font-display text-sm text-ink-soft">从书架上随手抽出的三本</p>
+    </div>
+    <span class="stamp text-jade">开架借阅</span>
+  </div>
+</div>

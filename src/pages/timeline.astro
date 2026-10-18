@@ -1,0 +1,160 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { allEvents, eventsByYear, eventStats } from '../data/events';
+import { eras, site } from '../data/site';
+import { eraOfYear } from '../lib/theme';
+import type { Era, TimeEvent } from '../types';
+import TimelineHero from '../components/timeline/TimelineHero.astro';
+import TimelineToolbar from '../components/timeline/TimelineToolbar.astro';
+import YearJump from '../components/timeline/YearJump.astro';
+import EraChapter from '../components/timeline/EraChapter.astro';
+import YearBlock from '../components/timeline/YearBlock.astro';
+import TimelineFooter from '../components/timeline/TimelineFooter.astro';
+
+const startYear = site.startYear;
+const endYear = site.endYear;
+const allYearTicks = Array.from({ length: endYear - startYear + 1 }, (_, index) => startYear + index);
+
+/** 数据契约是 1980–2009；万一有超范围的年份，就近归入首尾十年，避免丢数据 */
+function eraIdOfYear(year: number): Era['id'] {
+  const id = eraOfYear(year);
+  if (id === 'classic') return year < startYear ? '1980s' : '2000s';
+  return id;
+}
+
+interface YearGroup {
+  year: number;
+  events: TimeEvent[];
+}
+
+interface EraGroup {
+  era: Era;
+  years: YearGroup[];
+  count: number;
+  china: number;
+  global: number;
+}
+
+const groups: EraGroup[] = eras
+  .map((era) => {
+    const eraEvents = allEvents.filter((event) => eraIdOfYear(event.year) === era.id);
+    const byYear = new Map<number, TimeEvent[]>();
+    for (const event of eraEvents) {
+      const list = byYear.get(event.year) ?? [];
+      list.push(event);
+      byYear.set(event.year, list);
+    }
+    const years = [...byYear.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([year, events]) => ({ year, events }));
+
+    return {
+      era,
+      years,
+      count: eraEvents.length,
+      china: eraEvents.filter((event) => event.scope === 'china').length,
+      global: eraEvents.filter((event) => event.scope === 'global').length,
+    };
+  })
+  .filter((group) => group.count > 0);
+
+const eraRows = groups.map((group) => ({
+  id: group.era.id,
+  label: group.era.label,
+  years: group.era.years,
+  name: group.era.name,
+  color: group.era.color,
+  count: group.count,
+}));
+
+const yearCounts = allYearTicks.map((year) => ({
+  year,
+  count: eventsByYear.get(year)?.length ?? 0,
+}));
+
+const coveredYears = yearCounts.filter((item) => item.count > 0).length;
+const total = allEvents.length;
+const description = `${startYear} 到 ${endYear}，三十年里的中国与世界：磁带、录像厅、网吧、春晚、奥运与入世——按年份排成一条时光河流，可以按年代和地域筛选。`;
+---
+
+<BaseLayout title="时光轴" description={description}>
+  <TimelineHero
+    total={total}
+    coveredYears={coveredYears}
+    china={eventStats.china}
+    global={eventStats.global}
+    startYear={startYear}
+    endYear={endYear}
+    eraRows={eraRows}
+    years={allYearTicks}
+  />
+
+  <div data-collection data-timeline>
+    <TimelineToolbar total={total} />
+    <YearJump years={yearCounts} />
+
+    {
+      groups.length > 0 ? (
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="relative" data-timeline-track>
+            {/* 时光河流：河床 + 生长中的朱红线 + 河面光点 */}
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 z-0 w-0 lg:left-[11rem]"
+              data-timeline-axis
+              aria-hidden="true"
+            >
+              <div
+                class="absolute inset-y-0 left-0 w-[2px]"
+                style="background-image:repeating-linear-gradient(to bottom, rgba(34,28,22,0.16) 0 4px, transparent 4px 10px);"
+              >
+              </div>
+              <div
+                class="absolute inset-y-0 left-0 w-[2px] origin-top bg-vermilion"
+                data-timeline-line
+                style="transform:scaleY(0)"
+              >
+              </div>
+              <div class="absolute left-0 top-0 -ml-[5px]" data-timeline-head>
+                <span class="block h-2.5 w-2.5 rounded-full bg-vermilion ring-4 ring-vermilion/20"></span>
+              </div>
+            </div>
+
+            {
+              groups.flatMap((group, index) => [
+                <EraChapter
+                  era={group.era}
+                  index={index + 1}
+                  count={group.count}
+                  china={group.china}
+                  global={group.global}
+                />,
+                ...group.years.map((yearGroup) => (
+                  <YearBlock year={yearGroup.year} eraId={group.era.id} events={yearGroup.events} />
+                )),
+              ])
+            }
+          </div>
+        </div>
+      ) : (
+        <div class="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
+          <p class="font-display text-2xl text-ink">这条河暂时还没有水。</p>
+          <p class="mt-3 text-sm text-ink-soft">事件数据还在整理中，过些日子再来看看。</p>
+        </div>
+      )
+    }
+
+    <div data-empty hidden class="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <p class="font-display text-2xl text-ink">这一段河里没有你要找的记忆。</p>
+      <p class="mt-3 text-sm leading-7 text-ink-soft">
+        换一个年代或地域试试，或者点一下「全部」回到整条河。
+      </p>
+    </div>
+  </div>
+
+  <TimelineFooter />
+
+  <script>
+    import '../scripts/collection';
+    import '../scripts/timeline';
+  </script>
+</BaseLayout>

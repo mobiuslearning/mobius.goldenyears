@@ -1,0 +1,147 @@
+---
+/**
+ * 展柜筛选台：类别 / 年代 / 搜索 / 随机展品 / 展开全部展签。
+ * 交互走共享 src/scripts/collection.ts 的约定：
+ *   [data-collection] 根节点内，[data-filter][data-filter-key][data-filter-value]
+ *   [data-search-input]、[data-result-count]、[data-empty]、[data-item]。
+ */
+interface Props {
+  categories: Array<{ value: string; count: number }>;
+  eras: Array<{ value: string; label: string; count: number }>;
+  total: number;
+}
+
+const { categories, eras, total } = Astro.props;
+
+const chipBase =
+  'inline-flex items-center gap-1.5 border-[1.5px] px-2.5 py-1.5 font-mono text-[10px] tracking-[0.12em] transition-colors duration-200';
+const chipIdle = 'border-ink/25 bg-cream text-ink-soft hover:border-ink hover:text-ink';
+---
+<div class="relative border-[1.5px] border-ink bg-cream shadow-print">
+  <div class="flex items-center justify-between border-b-[1.5px] border-dashed border-ink/20 px-4 py-2.5 sm:px-5">
+    <span class="font-mono text-[9px] tracking-[0.26em] text-ink-faint">VISITOR DESK · 参观登记</span>
+    <span class="font-mono text-[9px] tracking-[0.2em] text-vermilion">OPEN 24H</span>
+  </div>
+
+  <div class="space-y-4 p-4 sm:p-5">
+    <!-- 搜索 + 快捷操作 -->
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <label
+        class="flex w-full items-center gap-2.5 border-[1.5px] border-ink bg-paper px-3 py-2.5 transition-shadow focus-within:shadow-print-sm lg:max-w-md"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-4 w-4 shrink-0 text-ink-faint"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="m15.5 15.5 5 5" stroke-linecap="round" />
+        </svg>
+        <span class="sr-only">搜索老物件</span>
+        <input
+          type="search"
+          data-search-input
+          placeholder="搜名字、别名、玩法、年份……"
+          autocomplete="off"
+          class="w-full bg-transparent font-body text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+        />
+        <kbd
+          class="hidden shrink-0 border border-ink/25 px-1.5 py-0.5 font-mono text-[10px] text-ink-faint sm:inline"
+          aria-hidden="true">/</kbd
+        >
+      </label>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" data-random-exhibit class={`${chipBase} ${chipIdle}`}>
+          <svg
+            viewBox="0 0 24 24"
+            class="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <rect x="3.5" y="3.5" width="17" height="17" rx="1" />
+            <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="8.5" cy="15.5" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+          </svg>
+          随机看一件
+        </button>
+        <button
+          type="button"
+          data-expand-all
+          aria-pressed="false"
+          class={`${chipBase} ${chipIdle}`}
+        >
+          <span data-expand-label>展开全部展签</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 类别 -->
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-2">
+      <span class="label-mono mr-0.5 w-full text-ink-faint sm:w-auto">类别</span>
+      <button type="button" data-filter data-filter-key="category" data-filter-value="all" class={`${chipBase} ${chipIdle}`}>
+        全部
+        <span class="opacity-50">{total}</span>
+      </button>
+      {
+        categories.map((category) => (
+          <button
+            type="button"
+            data-filter
+            data-filter-key="category"
+            data-filter-value={category.value}
+            class={`${chipBase} ${chipIdle}`}
+          >
+            {category.value}
+            <span class="opacity-50">{category.count}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- 年代 -->
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-2">
+      <span class="label-mono mr-0.5 w-full text-ink-faint sm:w-auto">年代</span>
+      <button type="button" data-filter data-filter-key="era" data-filter-value="all" class={`${chipBase} ${chipIdle}`}>
+        全部
+      </button>
+      {
+        eras.map((era) => (
+          <button
+            type="button"
+            data-filter
+            data-filter-key="era"
+            data-filter-value={era.value}
+            class={`${chipBase} ${chipIdle}`}
+          >
+            {era.label}
+            <span class="opacity-50">{era.count}</span>
+          </button>
+        ))
+      }
+      <span class="hidden font-mono text-[9px] tracking-[0.16em] text-ink-faint sm:inline">
+        按流行起始年份
+      </span>
+    </div>
+
+    <!-- 结果 -->
+    <div
+      class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t-[1.5px] border-dashed border-ink/20 pt-3 font-mono text-[10px] tracking-[0.14em] text-ink-faint"
+    >
+      <p>
+        展柜中
+        <span data-result-count class="mx-1 font-bold text-vermilion">{total}</span>
+        件 / 共 {total} 件
+      </p>
+      <p class="hidden sm:inline">点击展签底部的「玩法」可展开说明</p>
+    </div>
+  </div>
+</div>

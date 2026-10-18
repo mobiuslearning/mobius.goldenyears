@@ -1,0 +1,98 @@
+---
+import '../styles/global.css';
+import Nav from '../components/shared/Nav.astro';
+import Footer from '../components/shared/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  class?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  image = '/og-cover.svg',
+  noindex = false,
+  class: bodyClass = '',
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${site.title}` : `${site.title} —— ${site.tagline}`;
+const siteUrl = Astro.site ?? new URL('https://golden-years.example.com');
+const canonical = new URL(Astro.url.pathname, siteUrl);
+const ogImage = new URL(image, siteUrl).toString();
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={site.keywords.join(',')} />
+    <meta name="author" content={site.author} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#f4ecdc" />
+    <meta name="color-scheme" content="light" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <slot name="head" />
+  </head>
+  <body class={`grain-fixed flex min-h-screen flex-col antialiased ${bodyClass}`}>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:border-[1.5px] focus:border-ink focus:bg-cream focus:px-4 focus:py-2 focus:font-mono focus:text-xs"
+    >
+      跳到主要内容
+    </a>
+
+    <div class="fixed inset-x-0 top-0 z-[65] h-[3px] bg-ink/10" aria-hidden="true">
+      <div class="h-full w-0 bg-vermilion transition-[width] duration-150 ease-out" data-scroll-progress></div>
+    </div>
+
+    <Nav />
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <button
+      type="button"
+      data-back-to-top
+      class="fixed bottom-5 right-5 z-40 grid h-11 w-11 translate-y-3 place-items-center border-[1.5px] border-ink bg-cream text-ink opacity-0 shadow-print-sm transition-all duration-300 hover:bg-mustard"
+      aria-label="回到顶部"
+      tabindex="-1"
+    >
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="square" />
+      </svg>
+    </button>
+
+    <div class="pointer-events-none fixed inset-0 z-[55] hidden crt-overlay" aria-hidden="true"></div>
+
+    <script>
+      import '../scripts/site';
+    </script>
+    <slot name="scripts" />
+  </body>
+</html>

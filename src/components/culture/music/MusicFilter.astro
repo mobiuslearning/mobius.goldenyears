@@ -1,0 +1,99 @@
+---
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  total: number;
+  eraOptions: Option[];
+  regionOptions: Option[];
+  genreOptions: Option[];
+}
+
+const { total, eraOptions, regionOptions, genreOptions } = Astro.props;
+
+const groups = [
+  { key: 'era', label: '年代', options: eraOptions },
+  { key: 'region', label: '地区', options: regionOptions },
+  { key: 'genre', label: '曲风', options: genreOptions },
+];
+---
+
+<div class="border-[1.5px] border-ink bg-cream p-4 shadow-print-sm sm:p-5 lg:sticky lg:top-[4.75rem] lg:z-20">
+  <div class="flex flex-col gap-2.5 sm:flex-row sm:items-stretch">
+    <label class="relative block flex-1">
+      <span class="sr-only">搜索歌名、歌手、专辑或歌词</span>
+      <svg
+        viewBox="0 0 24 24"
+        class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="6"></circle>
+        <path d="m16 16 4 4" stroke-linecap="square"></path>
+      </svg>
+      <input
+        type="search"
+        data-search-input
+        placeholder="搜索歌名、歌手、专辑，或一句歌词"
+        autocomplete="off"
+        class="w-full border-[1.5px] border-ink/30 bg-paper py-2.5 pl-9 pr-3 font-body text-sm text-ink placeholder:text-ink-faint/70 focus:border-ink focus:outline-none"
+      />
+    </label>
+    <button
+      type="button"
+      data-filter-reset
+      class="btn-retro justify-center whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40"
+      disabled
+    >
+      重置筛选
+    </button>
+  </div>
+
+  <div class="mt-4 space-y-3">
+    {
+      groups.map((group) => (
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span class="w-8 shrink-0 font-mono text-[9px] font-bold tracking-[0.24em] text-ink-faint">
+            {group.label}
+          </span>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              data-filter
+              data-filter-key={group.key}
+              data-filter-value="all"
+              class="min-h-[32px] border-[1.5px] border-ink/25 bg-cream px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-ink-soft transition-colors hover:border-ink"
+            >
+              全部
+            </button>
+            {group.options.map((option) => (
+              <button
+                type="button"
+                data-filter
+                data-filter-key={group.key}
+                data-filter-value={option.value}
+                class="min-h-[32px] border-[1.5px] border-ink/25 bg-cream px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-ink-soft transition-colors hover:border-ink"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-dashed border-ink/20 pt-3">
+    <p class="font-mono text-[10px] tracking-[0.16em] text-ink-soft">
+      显示 <span data-result-count class="font-bold text-ink">{total}</span>
+      <span class="text-ink-faint">/ {total} 首</span>
+    </p>
+    <p class="hidden font-mono text-[9px] tracking-[0.16em] text-ink-faint sm:block">
+      <kbd class="border border-ink/25 bg-paper px-1 py-0.5 text-[9px]">/</kbd> 聚焦搜索
+    </p>
+  </div>
+</div>

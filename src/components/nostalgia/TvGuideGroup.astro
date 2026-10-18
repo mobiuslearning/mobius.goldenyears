@@ -1,0 +1,98 @@
+---
+/**
+ * 后厅陈列之二：电视节目单。
+ * 深色显像管面板 + 频道牌 + 按首播年份排列的节目单，避免使用虚构播出时间。
+ */
+import type { ExtraGroup } from '../../types';
+import { layoutLabels } from './museum';
+
+interface Props {
+  group: ExtraGroup;
+  index: number;
+}
+
+const { group, index } = Astro.props;
+const no = String(index + 1).padStart(2, '0');
+const nowShowing = group.items[0];
+---
+<section class="relative overflow-hidden border-[1.5px] border-ink bg-night text-cream shadow-print">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.06] line-grid" aria-hidden="true"></div>
+  <div class="relative grid lg:grid-cols-[15rem_1fr]">
+    <!-- 频道牌 -->
+    <div class="relative flex flex-col border-b border-cream/15 p-5 sm:p-6 lg:border-b-0 lg:border-r">
+      <p class="font-mono text-[9px] tracking-[0.26em] text-mustard">
+        外厅 {no} / {layoutLabels.tv.en}
+      </p>
+      <h3 class="mt-2 font-display text-2xl leading-tight text-cream sm:text-[1.75rem]">{group.title}</h3>
+      <p class="mt-2 text-[12.5px] leading-6 text-cream/50">{group.subtitle}</p>
+
+      <!-- 显像管画面 -->
+      <div class="scanlines relative mt-5 aspect-[4/3] max-w-[16rem] border border-cream/20 bg-cream/[0.04] p-3">
+        <p class="font-mono text-[8px] tracking-[0.24em] text-cream/35">NOW SHOWING</p>
+        <p class="mt-2 font-display text-lg leading-tight text-cream">{nowShowing?.name ?? '暂无节目'}</p>
+        <p class="mt-1 font-mono text-[9px] tracking-[0.16em] text-mustard">{nowShowing?.year ?? '——'}</p>
+        <div class="absolute inset-x-3 bottom-3 h-1 bg-cream/10" aria-hidden="true">
+          <div class="h-full w-1/3 bg-mustard/70"></div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-2 font-mono text-[9px] tracking-[0.2em] text-cream/40">
+        <span class="h-1.5 w-1.5 rounded-full bg-vermilion animate-blink" aria-hidden="true"></span>
+        ON AIR · 信号正常
+      </div>
+
+      <p class="mt-6 hidden border-t border-dashed border-cream/15 pt-4 font-mono text-[8px] leading-5 tracking-[0.16em] text-cream/25 lg:block">
+        频道号已不可考
+        <br />
+        信号来源：记忆天线
+        <br />
+        天线摆位：窗台，用铝线加长
+      </p>
+    </div>
+
+    <!-- 节目单 -->
+    <div class="relative">
+      <div
+        class="flex items-center gap-3 border-b border-cream/15 px-5 py-3 font-mono text-[8px] tracking-[0.24em] text-cream/35 sm:px-6"
+      >
+        <span class="w-[3.4rem] shrink-0 sm:w-[4.2rem]">首播</span>
+        <span class="flex-1">节目 / 简介</span>
+        <span class="hidden sm:inline">类型</span>
+      </div>
+
+      {
+        group.items.length > 0 ? (
+          <ul class="divide-y divide-cream/10">
+            {group.items.map((item) => (
+              <li class="group/tv grid grid-cols-[3.4rem_1fr] items-baseline gap-x-3 gap-y-1.5 px-5 py-4 transition-colors hover:bg-cream/[0.04] sm:grid-cols-[4.2rem_1fr_auto] sm:gap-x-4 sm:px-6">
+                <span class="font-mono text-[13px] font-bold tracking-[0.04em] text-mustard">
+                  {item.year ?? '——'}
+                </span>
+                <div class="min-w-0">
+                  <p class="font-display text-[15px] leading-snug text-cream transition-colors group-hover/tv:text-mustard">
+                    {item.name}
+                  </p>
+                  <p class="mt-1 text-[11.5px] leading-5 text-cream/45">{item.description}</p>
+                </div>
+                {item.tag && (
+                  <span class="col-start-2 w-fit border border-cream/20 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.14em] text-cream/45 sm:col-start-3 sm:self-center">
+                    {item.tag}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="px-6 py-12 text-center font-mono text-[10px] tracking-[0.2em] text-cream/30">今晚没有节目</p>
+        )
+      }
+
+      <div
+        class="flex flex-wrap items-center justify-between gap-2 border-t border-cream/15 px-5 py-3 font-mono text-[8px] tracking-[0.2em] text-cream/25 sm:px-6"
+      >
+        <span>按首播年份排列，非虚构播出时间</span>
+        <span>{group.items.length} 档 · 信号来自 1980—2009</span>
+      </div>
+    </div>
+  </div>
+</section>

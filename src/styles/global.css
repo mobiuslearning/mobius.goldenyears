@@ -1,0 +1,459 @@
+@import "tailwindcss";
+
+/* ============================================================
+   流金岁月 · 时光机 — 视觉系统
+   旧纸、铅字、朱红、胶片颗粒、CRT 扫描线
+   ============================================================ */
+
+@theme {
+  --color-ink: #221c16;
+  --color-ink-soft: #4a3f34;
+  --color-ink-faint: #7b6c5b;
+  --color-paper: #f4ecdc;
+  --color-paper-deep: #ebdfc8;
+  --color-cream: #fbf7ec;
+  --color-vermilion: #c23b2a;
+  --color-vermilion-soft: #dd6a50;
+  --color-jade: #2f6a5c;
+  --color-jade-soft: #5c9182;
+  --color-mustard: #d19c37;
+  --color-sky: #6c93a8;
+  --color-night: #16110d;
+  --color-night-soft: #241c15;
+
+  --font-display: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC",
+    "SimSun", "Times New Roman", serif;
+  --font-body: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "IBM Plex Mono", ui-monospace,
+    "Courier New", monospace;
+
+  --shadow-print: 4px 4px 0 0 var(--color-ink);
+  --shadow-print-sm: 2px 2px 0 0 var(--color-ink);
+  --shadow-glow: 0 0 24px 0 rgba(209, 156, 55, 0.35);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-slow: marquee 70s linear infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-blink: blink 1.2s steps(2, start) infinite;
+  --animate-flicker: flicker 6s linear infinite;
+  --animate-scan: scan 9s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  @keyframes flicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.82; }
+    98% { opacity: 0.94; }
+  }
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+}
+
+/* ------------------------------ base ------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-feature-settings: "kern" 1;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 15% 12%, rgba(209, 156, 55, 0.14), transparent 42%),
+      radial-gradient(circle at 88% 72%, rgba(194, 59, 42, 0.08), transparent 46%),
+      radial-gradient(circle at 50% 120%, rgba(47, 106, 92, 0.08), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: var(--color-vermilion);
+    color: var(--color-cream);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-vermilion);
+    outline-offset: 3px;
+  }
+
+  /* 老式滚动条 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-faint) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-ink-faint);
+    border: 3px solid var(--color-paper);
+    border-radius: 99px;
+  }
+}
+
+/* ---------------------------- components ---------------------------- */
+
+@layer components {
+  .paper-card {
+    position: relative;
+    background-color: var(--color-cream);
+    border: 1.5px solid var(--color-ink);
+    box-shadow: var(--shadow-print);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .paper-card-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 var(--color-ink);
+  }
+
+  .ink-border {
+    border: 1.5px solid var(--color-ink);
+  }
+
+  .btn-retro {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1.5px solid var(--color-ink);
+    background: var(--color-cream);
+    color: var(--color-ink);
+    padding: 0.65rem 1.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-print-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  }
+  .btn-retro:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--color-ink);
+    background: var(--color-mustard);
+  }
+  .btn-retro:active {
+    transform: translate(0, 0);
+    box-shadow: 0 0 0 0 var(--color-ink);
+  }
+  .btn-retro-solid {
+    background: var(--color-ink);
+    color: var(--color-cream);
+  }
+  .btn-retro-solid:hover {
+    background: var(--color-vermilion);
+    color: var(--color-cream);
+  }
+
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid currentColor;
+    padding: 0.2rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transform: rotate(-2.5deg);
+    opacity: 0.9;
+  }
+
+  .ticket {
+    position: relative;
+    background: var(--color-cream);
+    border: 1.5px solid var(--color-ink);
+    -webkit-mask:
+      radial-gradient(circle at 0 50%, transparent 7px, #000 7.5px) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent 7px, #000 7.5px) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 50%, transparent 7px, #000 7.5px) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent 7px, #000 7.5px) right / 51% 100% no-repeat;
+  }
+
+  .text-stroke {
+    -webkit-text-stroke: 1.5px var(--color-ink);
+    color: transparent;
+  }
+
+  .text-stroke-cream {
+    -webkit-text-stroke: 1.5px var(--color-cream);
+    color: transparent;
+  }
+
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* ---------------------------- utilities ---------------------------- */
+
+@layer utilities {
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+
+  .grain-fixed::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0.18;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(34, 28, 22, 0.05) 0px,
+      rgba(34, 28, 22, 0.05) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  }
+
+  .vignette::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(22, 17, 13, 0.28) 100%);
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(rgba(34, 28, 22, 0.18) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .line-grid {
+    background-image:
+      linear-gradient(rgba(34, 28, 22, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 28, 22, 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .bg-paper-texture {
+    background-color: var(--color-paper);
+    background-image:
+      linear-gradient(90deg, rgba(34, 28, 22, 0.025) 1px, transparent 1px),
+      linear-gradient(rgba(34, 28, 22, 0.02) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-left {
+    transform: translateX(-28px);
+  }
+  .reveal-scale {
+    transform: scale(0.94);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: var(--animate-marquee);
+  }
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .shadow-print {
+    box-shadow: var(--shadow-print);
+  }
+  .shadow-print-sm {
+    box-shadow: var(--shadow-print-sm);
+  }
+
+  .clip-slant {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), 0 100%);
+  }
+}
+
+/* ------------------------ motion preference ------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------------------------- CRT 复古模式 ---------------------------- */
+
+html.crt-mode body {
+  filter: sepia(0.16) contrast(1.04) saturate(0.92) brightness(0.99);
+}
+
+html.crt-mode .crt-overlay {
+  display: block !important;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(22, 17, 13, 0.09) 0px,
+      rgba(22, 17, 13, 0.09) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at center, transparent 52%, rgba(22, 17, 13, 0.3) 100%);
+  animation: flicker 6s linear infinite;
+}
+
+html.crt-mode .crt-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(209, 156, 55, 0.12) 50%, transparent 100%);
+  height: 26%;
+  animation: scan 8s linear infinite;
+}
+
+/* 年份导航的激活态 */
+[data-toc-link].is-active {
+  color: var(--color-vermilion);
+  border-color: var(--color-vermilion);
+}
+
+/* 随机记忆卡片切换动画 */
+@keyframes memory-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) rotate(-0.4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.is-shuffling [data-memory-content] {
+  animation: memory-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 时光机输出区 */
+.tm-card {
+  animation: memory-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 首页黑胶细纹 */
+.vinyl-grooves {
+  background:
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 38% 32%, #2a231d 0%, #0d0a08 55%, #050403 100%);
+}
+
+/* 首页星空：WebGL 不可用或 reduced-motion 时的静态兜底 */
+.starfield {
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 18%, rgba(244, 236, 220, 0.9), transparent 100%),
+    radial-gradient(1px 1px at 27% 64%, rgba(209, 156, 55, 0.8), transparent 100%),
+    radial-gradient(1.6px 1.6px at 43% 12%, rgba(244, 236, 220, 0.7), transparent 100%),
+    radial-gradient(1px 1px at 58% 78%, rgba(244, 236, 220, 0.75), transparent 100%),
+    radial-gradient(1.4px 1.4px at 72% 34%, rgba(209, 156, 55, 0.85), transparent 100%),
+    radial-gradient(1px 1px at 84% 62%, rgba(244, 236, 220, 0.6), transparent 100%),
+    radial-gradient(1.2px 1.2px at 92% 22%, rgba(221, 106, 80, 0.7), transparent 100%),
+    radial-gradient(1px 1px at 8% 82%, rgba(244, 236, 220, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 35% 40%, rgba(244, 236, 220, 0.5), transparent 100%),
+    radial-gradient(1.3px 1.3px at 66% 8%, rgba(244, 236, 220, 0.65), transparent 100%),
+    radial-gradient(1px 1px at 78% 88%, rgba(209, 156, 55, 0.6), transparent 100%),
+    radial-gradient(1.1px 1.1px at 50% 52%, rgba(244, 236, 220, 0.5), transparent 100%);
+  background-size: 100% 100%;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "golden-years-time-machine",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "流金岁月 · 时光机 — 8090 后集体记忆的静态时光网站",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.1.0",
+    "astro": "^5.13.0",
+    "tailwindcss": "^4.1.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.3"
+  }
+}
