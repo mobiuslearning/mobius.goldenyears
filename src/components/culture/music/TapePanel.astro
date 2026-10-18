@@ -82,9 +82,13 @@ const overflow = tracks.length - visibleTracks.length;
             <span class:list={['w-5 shrink-0 font-mono text-[10px] font-bold', accentText]}>
               {String(startIndex + i).padStart(2, '0')}
             </span>
-            <span class="min-w-0 flex-1 truncate font-display text-[15px] leading-6 text-ink">
+            <a
+              href={`/music/${song.id}/`}
+              class="min-w-0 flex-1 truncate font-display text-[15px] leading-6 text-ink transition-colors hover:text-vermilion"
+              title={`查看《${song.title}》详情`}
+            >
               {song.title}
-            </span>
+            </a>
             <span class="shrink-0 font-mono text-[10px] tracking-[0.1em] text-ink-faint">
               {song.artist} · {song.year}
             </span>

@@ -1,0 +1,65 @@
+---
+import type { Song } from '../../../types';
+
+interface Props {
+  prev?: Song;
+  next?: Song;
+}
+
+const { prev, next } = Astro.props;
+
+const cardClass =
+  'group flex flex-col border-[1.5px] border-ink bg-cream p-4 shadow-print-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-print focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion';
+---
+
+<nav class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 sm:pb-24 lg:px-8" aria-label="曲目导航">
+  <div class="grid gap-4 sm:grid-cols-2">
+    {
+      prev ? (
+        <a href={`/music/${prev.id}/`} class={cardClass}>
+          <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">← 上一首 · PREV</span>
+          <span class="mt-2 font-display text-[19px] leading-snug text-ink transition-colors group-hover:text-vermilion">
+            {prev.title}
+          </span>
+          <span class="mt-1 font-mono text-[10px] tracking-[0.12em] text-ink-soft">
+            {prev.artist} · {prev.year}
+          </span>
+        </a>
+      ) : (
+        <div class="flex flex-col border-[1.5px] border-dashed border-ink/25 p-4">
+          <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">← 上一首 · PREV</span>
+          <span class="mt-2 font-display text-[19px] leading-snug text-ink-faint">已经是第一首了</span>
+          <span class="mt-1 font-mono text-[10px] tracking-[0.12em] text-ink-faint">把 A 面翻回开头，再听一遍</span>
+        </div>
+      )
+    }
+
+    {
+      next ? (
+        <a href={`/music/${next.id}/`} class={`${cardClass} sm:items-end sm:text-right`}>
+          <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">下一首 · NEXT →</span>
+          <span class="mt-2 font-display text-[19px] leading-snug text-ink transition-colors group-hover:text-vermilion">
+            {next.title}
+          </span>
+          <span class="mt-1 font-mono text-[10px] tracking-[0.12em] text-ink-soft">
+            {next.artist} · {next.year}
+          </span>
+        </a>
+      ) : (
+        <div class="flex flex-col border-[1.5px] border-dashed border-ink/25 p-4 sm:items-end sm:text-right">
+          <span class="font-mono text-[9px] tracking-[0.22em] text-ink-faint">下一首 · NEXT →</span>
+          <span class="mt-2 font-display text-[19px] leading-snug text-ink-faint">磁带到这里就结束了</span>
+          <span class="mt-1 font-mono text-[10px] tracking-[0.12em] text-ink-faint">翻到 B 面，或者回到曲库</span>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="mt-8 flex flex-col items-center gap-3">
+    <a href="/music/" class="btn-retro">
+      <span aria-hidden="true">←</span>
+      返回曲库 · BACK TO TRACKS
+    </a>
+    <p class="font-mono text-[9px] tracking-[0.18em] text-ink-faint">或者去时光轴看看这一年前后的世界</p>
+  </div>
+</nav>

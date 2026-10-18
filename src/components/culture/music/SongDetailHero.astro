@@ -1,0 +1,137 @@
+---
+import type { Song } from '../../../types';
+import CoverArt from '../../shared/CoverArt.astro';
+import SongAudioPlayer from './SongAudioPlayer.astro';
+
+interface Props {
+  song: Song;
+  catalogNo: string;
+  total: number;
+  eraLabel: string;
+  accent?: 'vermilion' | 'jade' | 'mustard';
+  side?: 'A' | 'B';
+}
+
+const { song, catalogNo, total, eraLabel, accent = 'mustard', side = 'A' } = Astro.props;
+const accentText = accent === 'vermilion' ? 'text-vermilion-soft' : accent === 'jade' ? 'text-jade-soft' : 'text-mustard';
+const accentBorder = accent === 'vermilion' ? 'border-vermilion/60' : accent === 'jade' ? 'border-jade/60' : 'border-mustard/60';
+---
+
+<section class="grain relative overflow-hidden border-b-[1.5px] border-ink bg-night text-cream">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.06] line-grid" aria-hidden="true"></div>
+  <div
+    class="pointer-events-none absolute -right-24 top-0 h-[30rem] w-[30rem] rounded-full"
+    style="background: radial-gradient(circle, rgba(209,156,55,0.18), transparent 66%);"
+    aria-hidden="true"
+  ></div>
+  <div
+    class="pointer-events-none absolute -left-32 bottom-0 h-[26rem] w-[26rem] rounded-full"
+    style="background: radial-gradient(circle, rgba(194,59,42,0.16), transparent 68%);"
+    aria-hidden="true"
+  ></div>
+
+  <div class="relative z-10 mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:px-8">
+    <nav class="flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-cream/40" aria-label="面包屑">
+      <a href="/music/" class="link-underline transition-colors hover:text-mustard">← 返回曲库</a>
+      <span class="text-cream/20">/</span>
+      <span>SIDE {side} · TRACK {catalogNo}</span>
+      <span class="text-cream/20">/</span>
+      <span class="text-cream/60">{eraLabel}</span>
+    </nav>
+
+    <div class="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:gap-16">
+      <div class="relative mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:mx-0">
+        <div
+          class="pointer-events-none absolute -right-12 top-1/2 h-[96%] w-[96%] -translate-y-1/2 rounded-full border-[3px] border-[#0a0705] opacity-90"
+          style="background: repeating-radial-gradient(circle at 50% 50%, #17110c 0 1.5px, #0d0a07 1.5px 3px, #1c1610 3px 4.5px);"
+          aria-hidden="true"
+        >
+          <span class="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cream/30 bg-night"></span>
+        </div>
+
+        <div class="relative border-[1.5px] border-cream/25 bg-night-soft p-2 shadow-[10px_10px_0_0_rgba(0,0,0,0.45)]">
+          <CoverArt
+            title={song.title}
+            subtitle={song.artist}
+            year={song.year}
+            kind="music"
+            image={song.image}
+            label="MUSIC"
+          />
+        </div>
+
+        <span class="absolute -left-2 -top-3 z-10 -rotate-6 border-[1.5px] border-cream/50 bg-night px-2 py-1 font-mono text-[9px] tracking-[0.24em] text-cream/70">
+          SIDE {side}
+        </span>
+        <span class="absolute -bottom-3 right-2 z-10 rotate-3 border-[1.5px] border-mustard/70 bg-night px-2 py-1 font-mono text-[9px] tracking-[0.24em] text-mustard">
+          33⅓ RPM
+        </span>
+      </div>
+
+      <div class="min-w-0">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-mustard">
+          TRACK {catalogNo} / {String(total).padStart(2, '0')} · {eraLabel}
+        </p>
+
+        <h1 class="mt-3 font-display text-[clamp(2.1rem,5.2vw,3.8rem)] leading-[1.06] tracking-tight text-cream text-balance">
+          {song.title}
+        </h1>
+
+        <p class="mt-3 font-display text-lg text-cream/75 sm:text-xl">{song.artist}</p>
+
+        <div class="mt-5 flex flex-wrap items-center gap-1.5">
+          <span class:list={['border-[1.5px] px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-cream/75', accentBorder]}>
+            {song.year}
+          </span>
+          <span class="border-[1.5px] border-cream/25 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-cream/70">
+            {song.region}
+          </span>
+          {
+            song.genre && (
+              <span class="border-[1.5px] border-cream/25 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-cream/70">
+                {song.genre}
+              </span>
+            )
+          }
+          {
+            song.album && (
+              <span class="border-[1.5px] border-cream/25 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-cream/70">
+                《{song.album}》
+              </span>
+            )
+          }
+          {song.featured && <span class="stamp text-mustard">FEATURED</span>}
+        </div>
+
+        {
+          song.lyric && (
+            <blockquote class="mt-7 max-w-2xl border-l-2 border-mustard/80 pl-4">
+              <p class="font-display text-[16px] leading-8 text-cream/75 sm:text-[17px]">「{song.lyric}」</p>
+              <footer class="mt-1.5 font-mono text-[9px] tracking-[0.2em] text-cream/35">一句歌词 · 版权归原作者</footer>
+            </blockquote>
+          )
+        }
+
+        {
+          song.audio ? (
+            <SongAudioPlayer
+              src={song.audio}
+              title={song.title}
+              artist={song.artist}
+              album={song.album}
+              class="mt-7 max-w-xl"
+            />
+          ) : (
+            <p class="mt-7 font-mono text-[9px] tracking-[0.18em] text-cream/40">
+              暂无试听音频 · 页面下方{song.lyric ? '有歌词与那一年' : '是时代注解与那一年'}
+            </p>
+          )
+        }
+
+        <p class={`mt-5 font-mono text-[9px] tracking-[0.16em] ${accentText}`}>
+          {eraLabel} · 收录于《流金岁月》精选曲库
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

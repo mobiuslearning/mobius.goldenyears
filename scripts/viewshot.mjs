@@ -9,7 +9,7 @@ import { dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const [url, outArg, widthArg = '1440', heightArg = '1000', waitArg = '3500'] = process.argv.slice(2);
+const [url, outArg, widthArg = '1440', heightArg = '1000', waitArg = '3500', scrollArg = '0'] = process.argv.slice(2);
 if (!url || !outArg) {
   console.error('usage: node scripts/viewshot.mjs <url> <out.png> [width] [height] [waitMs]');
   process.exit(1);
@@ -100,15 +100,15 @@ try {
   await send('Runtime.evaluate', {
     expression: `(() => {
       document.querySelectorAll('astro-dev-toolbar').forEach((el) => el.remove());
-      window.scrollTo(0, 0);
+      document.documentElement.style.scrollBehavior = 'auto';
+      if ('${scrollArg}' !== 'keep') window.scrollTo(0, ${Number(scrollArg) || 0});
     })()`,
   });
-  await sleep(250);
+  await sleep(900);
 
   const shot = await send('Page.captureScreenshot', {
     format: 'png',
     captureBeyondViewport: false,
-    clip: { x: 0, y: 0, width, height, scale: 1 },
   });
   writeFileSync(out, Buffer.from(shot.data, 'base64'));
   console.log(`saved ${out} (${width}x${height})`);

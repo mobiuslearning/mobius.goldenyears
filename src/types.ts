@@ -3,6 +3,27 @@
  * 数据文件（src/data/**）必须遵循这些类型；页面组件只依赖这里。
  */
 
+/* ============================== 图片 ============================== */
+
+/**
+ * 实拍图/插图（用于详情页画廊）。
+ * 仅收录授权清晰的图片（CC0 / CC BY / CC BY-SA / 公有领域），必须保留署名与来源。
+ */
+export interface ImageCredit {
+  /** 本地路径，如 /images/objects/tuoluo.webp */
+  src: string;
+  alt: string;
+  /** 图片标题 */
+  title?: string;
+  /** 作者/摄影者 */
+  author?: string;
+  /** 协议简称，如 CC BY-SA 4.0 / Public domain */
+  license?: string;
+  licenseUrl?: string;
+  /** 原始页面地址（Wikimedia Commons 等） */
+  sourceUrl?: string;
+}
+
 /* ============================== 时光轴 ============================== */
 
 export type EventScope = 'global' | 'china';
@@ -32,6 +53,8 @@ export interface TimeEvent {
   tags?: string[];
   /** 可选：影响/意义的一句话补充 */
   impact?: string;
+  /** 是否为该年度的「年度大事件」（每年恰好一条为 true） */
+  highlight?: boolean;
 }
 
 /* =============================== 音乐 =============================== */
@@ -58,6 +81,12 @@ export interface Song {
   audio?: string;
   /** 是否首页/精选推荐 */
   featured?: boolean;
+  /** 可选主图（详情页）；缺省时使用程序化封面 */
+  image?: string;
+  /** 可选详情页画廊（授权明确的图片） */
+  gallery?: ImageCredit[];
+  /** 可选长文：创作背景 / 私人记忆（详情页展示，200–400 字） */
+  story?: string;
 }
 
 /* =============================== 书籍 =============================== */
@@ -90,6 +119,12 @@ export interface Book {
   /** 可选封面；缺省时使用程序化复古封面 */
   cover?: string;
   featured?: boolean;
+  /** 可选主图（详情页）；缺省时使用程序化封面 */
+  image?: string;
+  /** 可选详情页画廊（授权明确的图片） */
+  gallery?: ImageCredit[];
+  /** 可选长文：阅读记忆 / 书籍背景（详情页展示，200–400 字） */
+  story?: string;
 }
 
 /* =============================== 影视 =============================== */
@@ -117,6 +152,12 @@ export interface Movie {
   /** 可选海报；缺省时使用程序化复古海报 */
   cover?: string;
   featured?: boolean;
+  /** 可选主图（详情页）；缺省时使用程序化海报 */
+  image?: string;
+  /** 可选详情页画廊（授权明确的图片） */
+  gallery?: ImageCredit[];
+  /** 可选长文：观看记忆 / 幕后故事（详情页展示，200–400 字） */
+  story?: string;
 }
 
 /* ============================= 老物件 ============================= */
@@ -146,6 +187,12 @@ export interface NostalgiaItem {
   /** 一段私人化共同记忆，80 字以内 */
   memory?: string;
   featured?: boolean;
+  /** 可选实拍主图（详情页） */
+  image?: string;
+  /** 可选详情页画廊（CC 授权实拍图，含署名） */
+  gallery?: ImageCredit[];
+  /** 可选长文：物件的身世 / 玩法回忆（详情页展示，200–400 字） */
+  story?: string;
 }
 
 /** 老物件博物馆中的扩展分组（零食、动画片、广告语、游戏机……） */

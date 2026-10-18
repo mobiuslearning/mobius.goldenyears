@@ -1,0 +1,108 @@
+---
+interface Props {
+  src: string;
+  title: string;
+  artist?: string;
+  album?: string;
+  /** 额外容器类名 */
+  class?: string;
+}
+
+const { src, title, artist, album, class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={['border-[1.5px] border-cream/20 bg-night-soft/70 p-4 sm:p-5', className]}
+  data-audio-player
+  data-player-title={`${title}${artist ? ` - ${artist}` : ''}`}
+>
+  <audio class="hidden" src={src} preload="metadata" data-player-audio>
+    您的浏览器不支持音频播放。
+  </audio>
+
+  <div class="flex items-center gap-4">
+    <button
+      type="button"
+      data-player-toggle
+      aria-pressed="false"
+      aria-label={`播放 ${title}`}
+      class="grid h-12 w-12 shrink-0 place-items-center rounded-full border-[1.5px] border-cream/40 bg-vermilion text-cream shadow-print-sm transition-colors hover:bg-vermilion-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mustard sm:h-14 sm:w-14"
+    >
+      <svg data-player-icon-play viewBox="0 0 16 16" class="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden="true">
+        <path d="M4 2.5 13 8 4 13.5z"></path>
+      </svg>
+      <svg data-player-icon-pause viewBox="0 0 16 16" class="hidden h-4 w-4" fill="currentColor" aria-hidden="true">
+        <path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"></path>
+      </svg>
+    </button>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex items-baseline justify-between gap-3 font-mono text-[9px] tracking-[0.2em] text-cream/45">
+        <span class="truncate">试听 · AUDIO · {artist ?? '原声'}</span>
+        <span class="shrink-0 tabular-nums">
+          <span data-player-current>00:00</span>
+          <span class="text-cream/25">/</span>
+          <span data-player-duration>--:--</span>
+        </span>
+      </div>
+
+      <input
+        type="range"
+        data-player-progress
+        min="0"
+        max="1000"
+        step="1"
+        value="0"
+        aria-label={`播放进度 · ${title}`}
+        class="mt-2.5 w-full cursor-pointer appearance-none rounded-full bg-cream/20"
+      />
+
+      <p class="mt-2 truncate font-mono text-[9px] tracking-[0.14em] text-cream/35">
+        {album ? `《${album}》 · ` : ''}{artist ?? '未知歌手'} · {title}
+      </p>
+    </div>
+  </div>
+
+  <p data-player-error hidden class="mt-2.5 font-mono text-[9px] tracking-[0.14em] text-vermilion-soft">
+    音频加载失败，请稍后再试。
+  </p>
+
+  <noscript>
+    <p class="mt-2 font-mono text-[9px] tracking-[0.14em] text-cream/40">开启 JavaScript 后可在此试听。</p>
+  </noscript>
+</div>
+
+<style>
+  [data-player-progress] {
+    height: 4px;
+    background-image: linear-gradient(
+      to right,
+      var(--color-mustard) 0,
+      var(--color-mustard) var(--progress, 0%),
+      rgba(251, 247, 236, 0.2) var(--progress, 0%),
+      rgba(251, 247, 236, 0.2) 100%
+    );
+  }
+  [data-player-progress]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--color-mustard);
+    border: 1.5px solid var(--color-night);
+    box-shadow: 0 0 0 1px rgba(251, 247, 236, 0.3);
+  }
+  [data-player-progress]::-moz-range-track {
+    height: 4px;
+    border: 0;
+    background: transparent;
+  }
+  [data-player-progress]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--color-mustard);
+    border: 1.5px solid var(--color-night);
+  }
+</style>

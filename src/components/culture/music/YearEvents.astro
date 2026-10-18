@@ -1,0 +1,70 @@
+---
+import type { TimeEvent } from '../../../types';
+
+interface Props {
+  year: number;
+  events: TimeEvent[];
+  total?: number;
+}
+
+const { year, events, total = events.length } = Astro.props;
+const more = Math.max(total - events.length, 0);
+---
+
+<section class="mt-12" aria-labelledby={`year-events-${year}`}>
+  <div class="flex flex-wrap items-end justify-between gap-3 border-b-[1.5px] border-ink/20 pb-3">
+    <div>
+      <p class="label-mono text-vermilion">那一年 · THE YEAR</p>
+      <h2 id={`year-events-${year}`} class="mt-2 font-display text-[clamp(1.4rem,3vw,1.9rem)] leading-tight text-ink">
+        {year} 年，还发生过这些
+      </h2>
+    </div>
+    <a
+      href={`/timeline/${year}/`}
+      class="link-underline inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-vermilion transition-colors hover:text-ink"
+    >
+      打开 {year} 时光页 →
+    </a>
+  </div>
+
+  <ol class="mt-5 space-y-4">
+    {
+      events.map((event) => {
+        const isChina = event.scope === 'china';
+        const day = event.date ? event.date.slice(5).replace('-', '.') : null;
+        return (
+          <li class="relative border-l-[1.5px] border-ink/20 pl-4">
+            <span
+              class:list={[
+                'absolute -left-[5px] top-1.5 h-2 w-2 rounded-full border',
+                isChina ? 'border-vermilion bg-vermilion' : 'border-sky bg-sky',
+              ]}
+              aria-hidden="true"
+            />
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span
+                class:list={[
+                  'border px-1.5 py-0.5 font-mono text-[9px] tracking-[0.14em]',
+                  isChina ? 'border-vermilion/50 text-vermilion' : 'border-sky/60 text-sky',
+                ]}
+              >
+                {isChina ? '中国' : '世界'}
+              </span>
+              <span class="font-mono text-[9px] tracking-[0.14em] text-ink-faint">
+                {day ? `${day} · ` : ''}
+                {event.category}
+              </span>
+            </div>
+            <h3 class="mt-1.5 font-display text-[16px] leading-snug text-ink">{event.title}</h3>
+            <p class="mt-1 line-clamp-2 text-[13px] leading-6 text-ink-soft">{event.description}</p>
+          </li>
+        );
+      })
+    }
+  </ol>
+
+  <p class="mt-4 font-mono text-[9px] leading-5 tracking-[0.14em] text-ink-faint">
+    来自时光轴 · {year} 年{more > 0 ? ` 还有 ${more} 条事件` : ' 全部事件'}
+    <a href={`/timeline/${year}/`} class="link-underline ml-1 text-ink-soft hover:text-vermilion">按年份打开 →</a>
+  </p>
+</section>

@@ -26,7 +26,11 @@ const lifts = ['translate-y-3', '', 'translate-y-3'];
             lifts[i],
           ]}
         >
-          <div class={i === 1 ? 'shadow-print' : 'shadow-print-sm'}>
+          <a
+            href={`/books/${book.id}/`}
+            class:list={[i === 1 ? 'block shadow-print' : 'block shadow-print-sm']}
+            aria-label={`打开《${book.title}》的借书卡`}
+          >
             <CoverArt
               title={book.title}
               year={book.year}
@@ -34,7 +38,7 @@ const lifts = ['translate-y-3', '', 'translate-y-3'];
               label="BOOK"
               seed={`hero-${book.id}`}
             />
-          </div>
+          </a>
           {i === 1 && (
             <span class="absolute -right-2 -top-3 z-20 rotate-6 border-[1.5px] border-vermilion bg-cream px-1.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] text-vermilion shadow-print-sm">
               本周

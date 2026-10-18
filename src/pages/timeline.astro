@@ -10,6 +10,7 @@ import YearJump from '../components/timeline/YearJump.astro';
 import EraChapter from '../components/timeline/EraChapter.astro';
 import YearBlock from '../components/timeline/YearBlock.astro';
 import TimelineFooter from '../components/timeline/TimelineFooter.astro';
+import YearIndex from '../components/timeline/YearIndex.astro';
 
 const startYear = site.startYear;
 const endYear = site.endYear;
@@ -73,6 +74,12 @@ const yearCounts = allYearTicks.map((year) => ({
 }));
 
 const coveredYears = yearCounts.filter((item) => item.count > 0).length;
+
+const yearCards = yearCounts.map(({ year, count }) => {
+  const list = eventsByYear.get(year) ?? [];
+  const top = list.find((event) => event.highlight) ?? list.find((event) => event.scope === 'china') ?? list[0];
+  return { year, count, highlightTitle: top?.title, scope: top?.scope };
+});
 const total = allEvents.length;
 const description = `${startYear} 到 ${endYear}，三十年里的中国与世界：磁带、录像厅、网吧、春晚、奥运与入世——按年份排成一条时光河流，可以按年代和地域筛选。`;
 ---
@@ -150,6 +157,8 @@ const description = `${startYear} 到 ${endYear}，三十年里的中国与世�
       </p>
     </div>
   </div>
+
+  <YearIndex years={yearCards} totalEvents={total} coveredYears={coveredYears} />
 
   <TimelineFooter />
 

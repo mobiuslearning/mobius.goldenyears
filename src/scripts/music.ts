@@ -117,6 +117,117 @@ function initAudio() {
   });
 }
 
+/* --------------------------- 详情页播放器 --------------------------- */
+function formatClock(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+  const minutes = Math.floor(seconds / 60);
+  const rest = Math.floor(seconds % 60);
+  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`;
+}
+
+function initDetailPlayer() {
+  const root = document.querySelector<HTMLElement>('[data-audio-player]');
+  if (!root) return;
+  const audio = root.querySelector<HTMLAudioElement>('[data-player-audio]');
+  const button = root.querySelector<HTMLButtonElement>('[data-player-toggle]');
+  const progress = root.querySelector<HTMLInputElement>('[data-player-progress]');
+  const current = root.querySelector<HTMLElement>('[data-player-current]');
+  const duration = root.querySelector<HTMLElement>('[data-player-duration]');
+  const error = root.querySelector<HTMLElement>('[data-player-error]');
+  const playIcon = root.querySelector<HTMLElement>('[data-player-icon-play]');
+  const pauseIcon = root.querySelector<HTMLElement>('[data-player-icon-pause]');
+  if (!audio || !button) return;
+
+  const title = root.dataset.playerTitle ?? '';
+  let seeking = false;
+
+  const paint = (playing: boolean) => {
+    button.setAttribute('aria-pressed', String(playing));
+    button.setAttribute('aria-label', `${playing ? '暂停' : '播放'} ${title}`.trim());
+    playIcon?.classList.toggle('hidden', playing);
+    pauseIcon?.classList.toggle('hidden', !playing);
+  };
+
+  const paintProgress = (ratio: number) => {
+    if (progress && Number.isFinite(ratio)) {
+      progress.style.setProperty('--progress', `${Math.min(Math.max(ratio * 100, 0), 100)}%`);
+    }
+  };
+
+  const reset = () => {
+    paint(false);
+    if (progress) progress.value = '0';
+    if (current) current.textContent = '00:00';
+    paintProgress(0);
+  };
+
+  const syncDuration = () => {
+    if (duration) duration.textContent = formatClock(audio.duration);
+  };
+  syncDuration();
+  audio.addEventListener('loadedmetadata', syncDuration);
+  audio.addEventListener('durationchange', syncDuration);
+
+  audio.addEventListener('timeupdate', () => {
+    if (duration && Number.isFinite(audio.duration)) {
+      duration.textContent = formatClock(audio.duration);
+    }
+    if (current) current.textContent = formatClock(audio.currentTime);
+    if (!seeking && Number.isFinite(audio.duration) && audio.duration > 0) {
+      const ratio = audio.currentTime / audio.duration;
+      if (progress) progress.value = String(Math.round(ratio * 1000));
+      paintProgress(ratio);
+    }
+  });
+
+  audio.addEventListener('play', () => paint(true));
+  audio.addEventListener('pause', () => paint(false));
+  audio.addEventListener('ended', reset);
+
+  audio.addEventListener('error', () => {
+    if (error) error.hidden = false;
+    button.disabled = true;
+    button.classList.add('opacity-40', 'cursor-not-allowed');
+    paint(false);
+  });
+
+  button.addEventListener('click', () => {
+    if (audio.paused) {
+      const started = audio.play();
+      if (started && typeof started.catch === 'function') {
+        started.catch(() => {
+          if (error) error.hidden = false;
+          paint(false);
+        });
+      }
+    } else {
+      audio.pause();
+    }
+  });
+
+  if (progress) {
+    progress.addEventListener('pointerdown', () => {
+      seeking = true;
+    });
+    progress.addEventListener('input', () => {
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      const ratio = Number(progress.value) / 1000;
+      audio.currentTime = ratio * audio.duration;
+      paintProgress(ratio);
+      if (current) current.textContent = formatClock(audio.currentTime);
+    });
+    progress.addEventListener('change', () => {
+      seeking = false;
+    });
+    progress.addEventListener('pointerup', () => {
+      seeking = false;
+    });
+    progress.addEventListener('blur', () => {
+      seeking = false;
+    });
+  }
+}
+
 /* --------------------------- 筛选器增强 --------------------------- */
 function initFilterMeta() {
   const root = document.querySelector<HTMLElement>('[data-collection]');
@@ -156,6 +267,7 @@ function initFilterMeta() {
 function boot() {
   initVinylToggle();
   initAudio();
+  initDetailPlayer();
   initFilterMeta();
 }
 

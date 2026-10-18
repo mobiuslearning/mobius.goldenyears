@@ -37,15 +37,26 @@ const searchText = [
   data-reveal
   style={`--reveal-delay:${delay}ms`}
 >
+  <a
+    href={`/music/${song.id}/`}
+    class="absolute inset-0 z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-vermilion"
+    aria-label={`查看《${song.title}》详情`}
+  ></a>
+
   <div class="w-[84px] shrink-0 self-start sm:w-[92px]">
     <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" ratio="square" />
   </div>
 
   <div class="min-w-0 flex-1">
-    <p class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">
-      TRACK {String(index).padStart(2, '0')}
-      <span class="ml-1.5 text-ink/25">·</span>
-      <span class="ml-1.5">{song.year}</span>
+    <p class="flex items-center justify-between gap-2 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+      <span>
+        TRACK {String(index).padStart(2, '0')}
+        <span class="ml-1.5 text-ink/25">·</span>
+        <span class="ml-1.5">{song.year}</span>
+      </span>
+      <span class="shrink-0 text-vermilion opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        详情 →
+      </span>
     </p>
 
     <h3 class="mt-0.5 truncate font-display text-[17px] leading-snug text-ink" title={song.title}>{song.title}</h3>
@@ -83,7 +94,7 @@ const searchText = [
           data-audio-title={song.title}
           aria-pressed="false"
           aria-label={`试听 ${song.title}`}
-          class="mt-2 inline-flex items-center gap-1.5 border border-ink/30 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-ink-soft transition-colors hover:border-ink hover:bg-mustard/30"
+          class="relative z-10 mt-2 inline-flex items-center gap-1.5 border border-ink/30 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-ink-soft transition-colors hover:border-ink hover:bg-mustard/30"
         >
           <svg viewBox="0 0 12 12" class="h-2.5 w-2.5" fill="currentColor" aria-hidden="true">
             <path d="M3 1.5 10 6 3 10.5z"></path>

@@ -26,6 +26,7 @@ const search = [book.title, book.author, book.year, book.country, book.category,
   data-category={book.category}
   data-search={search}
 >
+  <a href={`/books/${book.id}/`} class="flex flex-1 flex-col" aria-label={`打开《${book.title}》的借书卡`}>
   <!-- 封面：微微立起，像从书架上被抽出来 -->
   <div class="relative">
     <div
@@ -80,9 +81,10 @@ const search = [book.title, book.author, book.year, book.country, book.category,
     <p class="mt-2 hidden text-[11.5px] leading-5 text-ink-faint line-clamp-2 sm:block">{book.description}</p>
     <div class="mt-auto flex items-center justify-between border-t border-ink/10 pt-2 font-mono text-[8px] tracking-[0.12em] text-ink-faint">
       <span>馆藏 {book.category}</span>
-      <span>{callNo}</span>
+      <span class="text-vermilion transition-transform group-hover/card:translate-x-0.5">阅读详情 →</span>
     </div>
   </div>
+  </a>
 
   <!-- 书架板：让每本书都像立在一格真实的书架上 -->
   <span

@@ -15,7 +15,13 @@ function pick<T extends { featured?: boolean }>(items: T[], count: number): T[] 
   return [...featured, ...items.filter((item) => !item.featured)].slice(0, count);
 }
 
-const featuredSongs = pick(songs, 4);
+const heroSong =
+  songs.find((song) => song.id === '1994-huang-an-yangyanghong') ??
+  songs.find((song) => Boolean(song.audio)) ??
+  songs[0];
+const featuredSongs = heroSong
+  ? [heroSong, ...pick(songs.filter((song) => song.id !== heroSong.id), 3)]
+  : pick(songs, 4);
 const featuredMovies = pick(movies, 3);
 const featuredBooks = pick(books, 4);
 const featuredToys = pick(toys, 3);
@@ -84,7 +90,7 @@ const stats = [
 
 <BaseLayout>
   <!-- ============================== HERO ============================== -->
-  <section class="relative isolate flex min-h-[88svh] flex-col overflow-hidden bg-night text-cream">
+  <section data-hero-player class="relative isolate flex min-h-[88svh] flex-col overflow-hidden bg-night text-cream">
     <canvas data-hero-canvas class="absolute inset-0 z-0 h-full w-full" aria-hidden="true"></canvas>
     <svg class="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
       {stars.map((star) => (
@@ -149,18 +155,87 @@ const stats = [
             ))
           }
         </dl>
+
+
+        {
+          heroSong && (
+            <div class="mt-7 max-w-xl border-[1.5px] border-cream/20 bg-night-soft/75 p-3 backdrop-blur-sm">
+              <audio data-hero-audio src={heroSong.audio} preload="metadata" loop></audio>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  data-audio-toggle
+                  aria-pressed="false"
+                  aria-label={`播放《${heroSong.title}》`}
+                  class="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-cream/30 bg-vermilion text-cream transition-colors hover:bg-mustard hover:text-ink"
+                >
+                  <svg data-icon-play viewBox="0 0 24 24" class="ml-0.5 h-5 w-5" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <svg data-icon-pause viewBox="0 0 24 24" class="hidden h-5 w-5" fill="currentColor" aria-hidden="true">
+                    <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+                  </svg>
+                </button>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-baseline justify-between gap-3">
+                    <p class="truncate font-display text-base text-cream">
+                      《{heroSong.title}》
+                      <span class="ml-1 font-body text-xs text-cream/50">{heroSong.artist} · {heroSong.year}</span>
+                    </p>
+                    <span class="shrink-0 font-mono text-[9px] tracking-[0.16em] text-cream/40" data-audio-time>00:00 / --:--</span>
+                  </div>
+                  <div
+                    data-audio-progress-track
+                    role="slider"
+                    tabindex="0"
+                    aria-label="播放进度"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                    class="mt-2 h-1.5 cursor-pointer bg-cream/15"
+                  >
+                    <div data-audio-progress class="h-full w-0 bg-mustard transition-[width] duration-150"></div>
+                  </div>
+                </div>
+                <span class="hidden shrink-0 font-mono text-[9px] tracking-[0.2em] text-cream/30 sm:block">SIDE A</span>
+              </div>
+              <p class="mt-2 flex items-center gap-1.5 font-mono text-[9px] leading-4 tracking-[0.12em] text-cream/30">
+                <span data-audio-dot class="h-1.5 w-1.5 shrink-0 rounded-full bg-jade"></span>
+                <span data-audio-status>默认曲目 · 点击播放（首次播放需一次手动点击）</span>
+              </p>
+            </div>
+          )
+        }
       </div>
 
       <!-- 黑胶唱机 -->
       <div class="relative mx-auto hidden w-full max-w-[27rem] lg:block">
-        <div class="vinyl-grooves animate-spin-slow relative aspect-square rounded-full border-[3px] border-cream/15 shadow-[0_0_90px_rgba(209,156,55,0.18)]">
+        <div class="vinyl-disc vinyl-grooves relative aspect-square rounded-full border-[3px] border-cream/15 shadow-[0_0_90px_rgba(209,156,55,0.18)]">
           <div class="absolute inset-[32%] flex flex-col items-center justify-center rounded-full border border-cream/30 bg-vermilion text-center">
             <span class="font-mono text-[8px] tracking-[0.3em] text-cream/70">SIDE A</span>
-            <span class="mt-1 font-display text-4xl leading-none text-cream">1996</span>
+            <span class="mt-1 font-display text-4xl leading-none text-cream">{heroSong?.year ?? 1994}</span>
             <span class="mt-1 font-mono text-[7px] tracking-[0.28em] text-cream/60">33⅓ RPM</span>
           </div>
           <span class="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-night ring-1 ring-cream/30"></span>
         </div>
+        <button
+          type="button"
+          data-audio-toggle
+          aria-pressed="false"
+          aria-label={`播放《${heroSong?.title ?? '样样红'}》`}
+          class="absolute bottom-8 right-4 z-20 grid h-16 w-16 place-items-center rounded-full border-[1.5px] border-cream/40 bg-night/85 text-cream shadow-[0_0_30px_rgba(209,156,55,0.25)] backdrop-blur-sm transition-colors hover:bg-mustard hover:text-ink"
+        >
+          <svg data-icon-play viewBox="0 0 24 24" class="ml-1 h-6 w-6" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg data-icon-pause viewBox="0 0 24 24" class="hidden h-6 w-6" fill="currentColor" aria-hidden="true">
+            <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+          </svg>
+        </button>
+        <p class="mt-5 text-center font-mono text-[9px] tracking-[0.2em] text-cream/30">
+          点击唱片 · 播放《{heroSong?.title ?? '样样红'}》
+        </p>
+
         <div class="absolute -right-3 top-3 h-[58%] w-[2px] origin-top rotate-[26deg] bg-gradient-to-b from-cream/50 to-cream/10" aria-hidden="true">
           <span class="absolute -bottom-2 -left-1 h-3 w-3 rotate-45 border border-cream/40 bg-night"></span>
         </div>
@@ -367,7 +442,7 @@ const stats = [
         {
           featuredSongs.map((song, index) => (
             <Reveal delay={index * 70}>
-              <a href="/music/" class="paper-card paper-card-hover group flex h-full flex-col p-3">
+              <a href={`/music/${song.id}/`} class="paper-card paper-card-hover group flex h-full flex-col p-3">
                 <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" seed={song.id} />
                 <div class="flex flex-1 flex-col px-1 pb-1 pt-4">
                   <div class="flex items-center justify-between gap-2">
@@ -410,7 +485,7 @@ const stats = [
             <div class="relative mt-7 grid grid-cols-3 gap-3">
               {
                 featuredMovies.map((movie, index) => (
-                  <a href="/movies/" class="group/poster block" style={`transform: rotate(${index === 1 ? '1.5deg' : index === 2 ? '-1deg' : '0deg'})`}>
+                  <a href={`/movies/${movie.id}/`} class="group/poster block" style={`transform: rotate(${index === 1 ? '1.5deg' : index === 2 ? '-1deg' : '0deg'})`}>
                     <CoverArt
                       title={movie.title}
                       subtitle={movie.year ? `${movie.year} · ${movie.type}` : movie.type}
@@ -448,7 +523,7 @@ const stats = [
               {
                 featuredBooks.map((book) => (
                   <li>
-                    <a href="/books/" class="group/book flex items-center gap-4 py-4">
+                    <a href={`/books/${book.id}/`} class="group/book flex items-center gap-4 py-4">
                       <CoverArt title={book.title} subtitle={book.author} year={book.year} kind="book" seed={book.id} class="w-14 shrink-0" />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-baseline justify-between gap-3">
@@ -505,7 +580,7 @@ const stats = [
         {
           featuredToys.map((toy, index) => (
             <Reveal delay={index * 80}>
-              <a href="/toys/" class="paper-card paper-card-hover group flex h-full flex-col p-6">
+              <a href={`/toys/${toy.id}/`} class="paper-card paper-card-hover group flex h-full flex-col p-6">
                 <div class="flex items-center justify-between">
                   <span class="label-mono text-vermilion">{toy.category}</span>
                   <span class="font-mono text-[10px] tracking-[0.16em] text-ink-faint">{toy.yearStart} 年代</span>
@@ -656,9 +731,27 @@ const stats = [
     </div>
   </section>
 
+  <style>
+    .vinyl-disc {
+      animation: vinyl-spin 14s linear infinite;
+      animation-play-state: paused;
+    }
+    .is-playing .vinyl-disc {
+      animation-play-state: running;
+    }
+    @keyframes vinyl-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .vinyl-disc { animation: none; }
+    }
+  </style>
+
   <script type="application/json" data-memory-pool set:html={memoryJson}></script>
   <script>
     import '../scripts/random-memory';
     import '../scripts/hero-3d';
+    import '../scripts/hero-audio';
   </script>
 </BaseLayout>

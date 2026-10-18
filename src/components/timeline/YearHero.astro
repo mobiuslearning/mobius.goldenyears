@@ -1,0 +1,199 @@
+---
+import type { Era, TimeEvent } from '../../types';
+import { accentMap, type AccentKey } from '../../lib/theme';
+
+interface Props {
+  year: number;
+  era: Era;
+  eraIndex: number;
+  eventsCount: number;
+  chinaCount: number;
+  globalCount: number;
+  highlight?: TimeEvent;
+  oneLiner: string;
+  startYear: number;
+  endYear: number;
+  yearTicks: number[];
+  prevYear?: number;
+  nextYear?: number;
+}
+
+const {
+  year,
+  era,
+  eraIndex,
+  eventsCount,
+  chinaCount,
+  globalCount,
+  highlight,
+  oneLiner,
+  startYear,
+  endYear,
+  yearTicks,
+  prevYear,
+  nextYear,
+} = Astro.props;
+
+const tone = accentMap[era.color as AccentKey];
+const scopeLabel = highlight?.scope === 'china' ? '中国' : '世界';
+---
+
+<section class="relative overflow-hidden bg-night text-cream">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.07] line-grid" aria-hidden="true"></div>
+  <div
+    class="pointer-events-none absolute -right-24 -top-24 h-[26rem] w-[26rem] rounded-full opacity-20 blur-3xl"
+    style={`background:${era.color === 'vermilion' ? '#c23b2a' : era.color === 'jade' ? '#2f6a5c' : '#d19c37'}`}
+    aria-hidden="true">
+  </div>
+
+  <div class="relative mx-auto max-w-7xl px-4 pb-9 pt-8 sm:px-6 sm:pb-11 sm:pt-10 lg:px-8">
+    <!-- 顶部：返回 + 年代 -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <a
+        href="/timeline/"
+        class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-cream/60 transition-colors hover:text-cream"
+      >
+        <span aria-hidden="true">←</span>
+        完整时光轴
+      </a>
+      <div class="flex items-center gap-2">
+        <a
+          href={`/timeline/#era-${era.id}`}
+          class:list={['stamp', tone.text, 'transition-colors hover:bg-cream/10']}>{era.label}</a
+        >
+        <span class="font-mono text-[10px] tracking-[0.24em] text-cream/40">
+          CH.{String(eraIndex).padStart(2, '0')} · {era.years}
+        </span>
+      </div>
+    </div>
+
+    <div class="mt-8 grid gap-9 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-end lg:gap-12">
+      <!-- 年份 + 一句话 -->
+      <div>
+        <p class="font-mono text-[10px] tracking-[0.32em] text-vermilion-soft">
+          YEAR IN REVIEW · {era.years}
+        </p>
+        <h1
+          class="relative mt-1 font-display text-[clamp(4.8rem,15vw,12.5rem)] font-bold leading-[0.86] tracking-tight text-cream"
+        >
+          {year}
+          <span
+            class="pointer-events-none absolute -top-3 left-1/2 hidden select-none font-display text-[clamp(6rem,18vw,16rem)] leading-none text-cream/[0.05] sm:block"
+            aria-hidden="true">{era.label}</span
+          >
+        </h1>
+        <div class:list={['mt-5 h-[3px] w-24', tone.bg]} aria-hidden="true"></div>
+
+        <p class="mt-6 max-w-xl font-display text-[clamp(1.1rem,2.1vw,1.55rem)] leading-[1.7] text-cream/90 text-balance">
+          {oneLiner}
+        </p>
+
+        <div class="mt-6 flex flex-wrap items-center gap-2.5">
+          <span class="stamp text-cream/70">{eventsCount} 条记忆</span>
+          <span class="border border-vermilion/50 px-2 py-1 font-mono text-[10px] tracking-[0.12em] text-vermilion-soft">
+            中国 {chinaCount}
+          </span>
+          <span class="border border-sky/50 px-2 py-1 font-mono text-[10px] tracking-[0.12em] text-sky">
+            世界 {globalCount}
+          </span>
+          <a
+            href={`/timeline/#year-${year}`}
+            class="border-b border-cream/25 pb-0.5 font-mono text-[10px] tracking-[0.14em] text-cream/55 transition-colors hover:border-cream/60 hover:text-cream"
+          >
+            在完整时光轴中定位 →
+          </a>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-4 font-mono text-[10px] tracking-[0.18em] text-cream/45">
+          <a href="#year-timeline" class="transition-colors hover:text-cream">年度时间轴 ↓</a>
+          <a href="#year-culture" class="transition-colors hover:text-cream">那一年听看读玩 ↓</a>
+        </div>
+      </div>
+
+      <!-- 年度大事件 -->
+      <div class="relative border-[1.5px] border-cream/25 bg-night-soft/80 p-5 sm:p-6">
+        <span class="absolute -top-2.5 left-5 h-4 w-14 -rotate-2 bg-mustard/25" aria-hidden="true"></span>
+        <div class="flex items-center justify-between gap-3">
+          <span class="font-mono text-[10px] font-bold tracking-[0.26em] text-mustard">年度大事件</span>
+          <span class="font-mono text-[9px] tracking-[0.18em] text-cream/35">
+            {scopeLabel} · {highlight?.category ?? '社会'}
+          </span>
+        </div>
+        {
+          highlight ? (
+            <>
+              <h2 class="mt-3 font-display text-[clamp(1.3rem,2.5vw,1.85rem)] leading-snug text-cream text-balance">
+                {highlight.title}
+              </h2>
+              <p class="mt-3 text-[13px] leading-7 text-cream/60 text-pretty">{highlight.description}</p>
+              {highlight.impact && highlight.impact.trim() !== oneLiner && (
+                <p class="mt-3 border-l-2 border-vermilion/70 pl-3 text-[12px] leading-6 text-cream/45">
+                  <span class="mr-1 font-mono text-[9px] tracking-[0.16em] text-vermilion-soft">影响</span>
+                  {highlight.impact}
+                </p>
+              )}
+              {highlight.tags && highlight.tags.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-1.5">
+                  {highlight.tags.map((tag) => (
+                    <li class="border border-cream/15 px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.06em] text-cream/40">
+                      #{tag}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ) : (
+            <p class="mt-3 font-display text-xl text-cream/80">这一年的年度大事件还在整理。</p>
+          )
+        }
+      </div>
+    </div>
+
+    <!-- 年份刻度 + 前后一年 -->
+    <div class="mt-9 flex items-center gap-3 border-t border-cream/10 pt-5 sm:gap-5">
+      {
+        prevYear ? (
+          <a
+            href={`/timeline/${prevYear}/`}
+            class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-cream/55 transition-colors hover:text-cream"
+          >
+            ← {prevYear}
+          </a>
+        ) : (
+          <span class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-cream/25">河的源头</span>
+        )
+      }
+      <div class="relative flex h-7 flex-1 items-end justify-between" aria-hidden="true">
+        {
+          yearTicks.map((tick) => (
+            <span
+              class:list={[
+                'w-px',
+                tick === year
+                  ? 'h-6 w-[2px] bg-vermilion'
+                  : tick % 10 === 0
+                    ? 'h-3 bg-cream/35'
+                    : 'h-1.5 bg-cream/15',
+              ]}
+            />
+          ))
+        }
+      </div>
+      {
+        nextYear ? (
+          <a
+            href={`/timeline/${nextYear}/`}
+            class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-cream/55 transition-colors hover:text-cream"
+          >
+            {nextYear} →
+          </a>
+        ) : (
+          <span class="shrink-0 font-mono text-[10px] tracking-[0.16em] text-cream/25">河的尽头</span>
+        )
+      }
+    </div>
+    <p class="mt-2 text-center font-mono text-[9px] tracking-[0.24em] text-cream/25">
+      {startYear} — {endYear}
+    </p>
+  </div>
+</section>

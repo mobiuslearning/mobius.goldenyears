@@ -1,0 +1,70 @@
+---
+interface NavYear {
+  year: number;
+  title: string;
+}
+
+interface Props {
+  prev?: NavYear;
+  next?: NavYear;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<section class="border-t-[1.5px] border-ink/15 bg-paper py-10 sm:py-14">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <a href="/timeline/" class="btn-retro">← 返回完整时光轴</a>
+      <a
+        href="/timeline/#year-index"
+        class="link-underline font-mono text-[10px] tracking-[0.16em] text-ink-soft transition-colors hover:text-vermilion"
+      >
+        换一年看看 · 按年份打开 →
+      </a>
+    </div>
+
+    <div class="mt-6 grid gap-4 sm:grid-cols-2">
+      {
+        prev ? (
+          <a
+            href={`/timeline/${prev.year}/`}
+            class="group border-[1.5px] border-ink bg-cream p-4 shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            <span class="flex items-center gap-2 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+              <span aria-hidden="true">←</span> 上一年 · {prev.year}
+            </span>
+            <span class="mt-2 block truncate font-display text-xl leading-tight text-ink transition-colors group-hover:text-vermilion">
+              {prev.title}
+            </span>
+          </a>
+        ) : (
+          <div class="border-[1.5px] border-dashed border-ink/25 p-4">
+            <span class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">上一年</span>
+            <p class="mt-2 font-display text-lg text-ink-faint">这里是河的源头。</p>
+          </div>
+        )
+      }
+      {
+        next ? (
+          <a
+            href={`/timeline/${next.year}/`}
+            class="group border-[1.5px] border-ink bg-cream p-4 text-right shadow-print-sm transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            <span class="flex items-center justify-end gap-2 font-mono text-[9px] tracking-[0.2em] text-ink-faint">
+              下一年 · {next.year} <span aria-hidden="true">→</span>
+            </span>
+            <span class="mt-2 block truncate font-display text-xl leading-tight text-ink transition-colors group-hover:text-vermilion">
+              {next.title}
+            </span>
+          </a>
+        ) : (
+          <div class="border-[1.5px] border-dashed border-ink/25 p-4 text-right">
+            <span class="font-mono text-[9px] tracking-[0.2em] text-ink-faint">下一年</span>
+            <p class="mt-2 font-display text-lg text-ink-faint">河到这里拐进海里。</p>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
