@@ -9,7 +9,7 @@ import { dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const [url, outArg, widthArg = '1440', heightArg = '1000', waitArg = '3500', scrollArg = '0'] = process.argv.slice(2);
+const [url, outArg, widthArg = '1440', heightArg = '1000', waitArg = '3500', scrollArg = '0', clickArg = ''] = process.argv.slice(2);
 if (!url || !outArg) {
   console.error('usage: node scripts/viewshot.mjs <url> <out.png> [width] [height] [waitMs]');
   process.exit(1);
@@ -104,6 +104,13 @@ try {
       if ('${scrollArg}' !== 'keep') window.scrollTo(0, ${Number(scrollArg) || 0});
     })()`,
   });
+  if (clickArg) {
+    await send('Runtime.evaluate', {
+      expression: `document.querySelector(${JSON.stringify(clickArg)})?.click()`,
+    });
+    await sleep(1200);
+  }
+
   await sleep(900);
 
   const shot = await send('Page.captureScreenshot', {

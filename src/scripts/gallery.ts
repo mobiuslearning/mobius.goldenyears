@@ -1,5 +1,5 @@
 /**
- * AI 影像馆筛选：分类 + 搜索。
+ * 影像馆筛选：分类 + 搜索。
  */
 const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-gallery-filter]'));
 const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-ip-section]'));

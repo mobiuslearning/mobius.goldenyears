@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 根据七牛上传映射表生成：
-1) src/data/galleries.ts —— 与本站影视匹配的 AI 复原图集（详情页使用）
-2) src/data/aiGallery.ts —— 全部 57 个 IP 的 AI 影像馆数据（/ai-gallery/ 使用）
+1) src/data/galleries.ts —— 与本站影视匹配的角色影像图集（详情页使用）
+2) src/data/imageGallery.ts —— 全部 57 个 IP 的影像馆数据（/gallery/ 使用）
 
 图片全部引用七牛云 URL，不复制本地文件。
-用法：python3 scripts/build-ai-gallery.py
+用法：python3 scripts/build-image-gallery.py
 """
 import argparse
 import json
@@ -17,8 +17,8 @@ from collections import Counter, defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_MAPPING = '七牛上传映射表.json'
 DEFAULT_INDEX = '.import/图片索引.json'
-AUTHOR = '克鲁鲁大王（抖音 AI 复原）'
-LICENSE = 'AI 生成 · 非原剧照'
+AUTHOR = '克鲁鲁大王'
+LICENSE = '角色影像 · 非原剧照'
 
 
 def norm(value: str) -> str:
@@ -117,17 +117,24 @@ def main():
 
     def characters_for(work):
         meta = works_meta.get(work) or {}
-        names = [c.get('name', '') for c in (meta.get('characters') or []) if c.get('name')]
+        names = []
+        for character in meta.get('characters') or []:
+            name = character.get('name', '')
+            if not name:
+                continue
+            name = re.sub(r'\s*AI\s*复原', '', name)
+            name = re.sub(r'[（(]\s*[）)]', '', name).strip()
+            names.append(name)
         return '、'.join(names[:3])
 
     def credit(image, ip, category, width=900):
         work = image.get('work') or ''
         chars = characters_for(work)
-        alt = f'{ip} AI 复原图：{chars}' if chars else f'{ip} AI 复原图'
+        alt = f'{ip} 角色影像：{chars}' if chars else f'{ip} 角色影像'
         return {
             'src': thumb(image['url'], width),
             'alt': alt,
-            'title': f'{ip} · AI 复原',
+            'title': f'{ip} · 角色影像',
             'author': AUTHOR,
             'license': LICENSE,
             'sourceUrl': image['url'],
@@ -148,9 +155,9 @@ def main():
         "import type { ImageCredit } from '../types';",
         '',
         '/**',
-        ' * AI 复原图集（引用七牛云图片 URL）。',
-        ' * 图片为 AI 生成、非原剧剧照，详情页会标注「AI 复原 · 非原剧照」。',
-        ' * 由 scripts/build-ai-gallery.py 生成。',
+        ' * 影像馆图集（引用七牛云图片 URL）。',
+        ' * 详情页会标注「角色影像 · 非原剧照」。',
+        ' * 由 scripts/build-image-gallery.py 生成。',
         ' */',
         'export const galleries: Record<string, ImageCredit[]> = {',
     ]
@@ -171,7 +178,7 @@ def main():
     galleries_lines += ['};', '', 'export function galleryFor(id: string): ImageCredit[] {', '  return galleries[id] ?? [];', '}', '']
     open(os.path.join(ROOT, 'src/data/galleries.ts'), 'w').write('\n'.join(galleries_lines))
 
-    # 2) 全部 IP 的 AI 影像馆
+    # 2) 全部 IP 的影像馆
     category_rank = {'电影': 0, '电视剧': 1, '动画': 2, '游戏': 3, '未分类': 4}
     ips = []
     for ip, images in by_ip.items():
@@ -193,12 +200,12 @@ def main():
     for i, item in enumerate(ips):
         item['id'] = f'ip-{i + 1:02d}'
     total_images = len(flat)
-    print(f'AI 影像馆：{len(ips)} 个 IP，展示 {sum(len(x["images"]) for x in ips)} 张（总 {total_images} 张）')
+    print(f'影像馆：{len(ips)} 个 IP，展示 {sum(len(x["images"]) for x in ips)} 张（总 {total_images} 张）')
 
     lines = [
         "import type { ImageCredit } from '../types';",
         '',
-        'export interface AiGalleryIp {',
+        'export interface ImageGalleryIp {',
         '  id: string;',
         '  ip: string;',
         '  category: string;',
@@ -208,10 +215,10 @@ def main():
         '  images: ImageCredit[];',
         '}',
         '',
-        '/** 由 scripts/build-ai-gallery.py 生成，图片全部引用七牛云 URL。 */',
-        f'export const aiGalleryStats = {{ ips: {len(ips)}, images: {total_images}, works: {len(works_meta) or 226} }};',
+        '/** 由 scripts/build-image-gallery.py 生成，图片全部引用七牛云 URL。 */',
+        f'export const imageGalleryStats = {{ ips: {len(ips)}, images: {total_images}, works: {len(works_meta) or 226} }};',
         '',
-        'export const aiGalleryIps: AiGalleryIp[] = [',
+        'export const imageGalleryIps: ImageGalleryIp[] = [',
     ]
     for item in ips:
         years = ', '.join(f"'{ts(y)}'" for y in item['years'])
@@ -237,7 +244,7 @@ def main():
         lines.append('    ],')
         lines.append('  },')
     lines += ['];', '']
-    open(os.path.join(ROOT, 'src/data/aiGallery.ts'), 'w').write('\n'.join(lines))
+    open(os.path.join(ROOT, 'src/data/imageGallery.ts'), 'w').write('\n'.join(lines))
 
     categories = Counter(item['category'] for item in ips)
     print('分类分布：', dict(categories))

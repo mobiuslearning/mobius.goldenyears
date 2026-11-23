@@ -1,19 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/shared/Reveal.astro';
-import { aiGalleryIps, aiGalleryStats } from '../data/aiGallery';
+import { imageGalleryIps, imageGalleryStats } from '../data/imageGallery';
 
 const categories = ['全部', '电影', '电视剧', '动画', '游戏', '未分类'];
 const categoryCounts = new Map<string, number>();
-for (const item of aiGalleryIps) {
+for (const item of imageGalleryIps) {
   categoryCounts.set(item.category, (categoryCounts.get(item.category) ?? 0) + 1);
 }
-const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length, 0);
+const previewTotal = imageGalleryIps.reduce((sum, item) => sum + item.images.length, 0);
 ---
 
 <BaseLayout
-  title="AI 影像馆"
-  description="57 个影视 IP、5025 张 AI 复原角色图：由抖音创作者「克鲁鲁大王」创作，图片托管于七牛云。非原剧剧照，仅作角色形象参考。"
+  title="影像馆"
+  description="57 个影视 IP、5025 张角色影像：来自抖音创作者「克鲁鲁大王」的影视角色群像，不是原剧剧照。按分类筛选、按 IP 或角色搜索，点击图片可放大浏览。"
 >
   <!-- ============================== HERO ============================== -->
   <section class="relative overflow-hidden border-b-[1.5px] border-ink bg-night text-cream">
@@ -23,23 +23,20 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
 
     <div class="relative mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8 lg:py-24">
       <div>
-        <p class="font-mono text-[10px] tracking-[0.3em] text-mustard">AI RESTORATION ARCHIVE · 57 IPS</p>
+        <p class="font-mono text-[10px] tracking-[0.3em] text-mustard">RESTORED ARCHIVE · 57 IPS</p>
         <h1 class="mt-5 font-display text-[clamp(2.6rem,6vw,4.8rem)] leading-[0.95]">
-          AI 影像馆
+          影像馆
           <span class="mt-2 block text-[0.44em] tracking-[0.3em] text-stroke-cream">RESTORED MEMORIES</span>
         </h1>
         <p class="mt-6 max-w-xl text-[15px] leading-8 text-cream/65">
-          这里收录抖音创作者「克鲁鲁大王」用 AI 复原的影视角色群像：57 个 IP、226 部作品、5025 张图。
+          抖音创作者「克鲁鲁大王」整理的影视角色群像：57 个 IP、226 部作品、5025 张图。
           它们不是原剧剧照，而是另一双手对旧角色的重新想象。
         </p>
 
-        <div class="mt-7 border-l-2 border-mustard/70 bg-night-soft/60 p-4 text-xs leading-6 text-cream/55">
-          <p class="font-mono text-[9px] tracking-[0.22em] text-mustard">内容说明</p>
-          <p class="mt-1">
-            全部图片为 AI 生成（原视频文案标注「虚构演绎，仅供娱乐」），非电影/电视剧原版剧照或海报。
-            图片托管于七牛云（https://img.mobius.cool），仅作角色形象参考；版权与肖像相关权利归创作者及原权利人。
-          </p>
-        </div>
+        <p class="mt-6 flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-cream/40">
+          <span class="h-1.5 w-1.5 rounded-full bg-jade"></span>
+          点击任意图片可放大浏览
+        </p>
 
         <div class="mt-7 flex flex-wrap gap-3">
           <a href="/movies/" class="btn-retro border-mustard bg-mustard text-ink hover:bg-cream">回到影视海报墙</a>
@@ -56,15 +53,15 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
           <dl class="mt-5 grid grid-cols-2 gap-px bg-cream/10">
             <div class="bg-night px-4 py-4">
               <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">影视 IP</dt>
-              <dd class="mt-1 font-display text-3xl text-mustard">{aiGalleryStats.ips}</dd>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.ips}</dd>
             </div>
             <div class="bg-night px-4 py-4">
               <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">作品</dt>
-              <dd class="mt-1 font-display text-3xl text-mustard">{aiGalleryStats.works}</dd>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.works}</dd>
             </div>
             <div class="bg-night px-4 py-4">
               <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">原图</dt>
-              <dd class="mt-1 font-display text-3xl text-mustard">{aiGalleryStats.images.toLocaleString('zh-CN')}</dd>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.images.toLocaleString('zh-CN')}</dd>
             </div>
             <div class="bg-night px-4 py-4">
               <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">本页预览</dt>
@@ -72,11 +69,11 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
             </div>
           </dl>
           <p class="mt-4 border-t border-cream/15 pt-3 font-mono text-[9px] tracking-[0.16em] text-cream/30">
-            CDN · img.mobius.cool / 影视剧/ · 点击图片查看原图
+            点击图片放大 · 键盘 ← → 切换
           </p>
         </div>
         <span class="absolute -bottom-3 right-4 rotate-2 border-[1.5px] border-cream/30 bg-night px-2 py-1 font-mono text-[9px] tracking-[0.2em] text-cream/50">
-          AI GENERATED · NOT STILLS
+          ROLE PORTRAITS · NOT STILLS
         </span>
       </div>
     </div>
@@ -90,11 +87,11 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
           <p class="label-mono text-vermilion">Browse · 按 IP 浏览</p>
           <h2 class="mt-2 font-display text-[clamp(1.8rem,3.5vw,2.6rem)] text-ink">57 个 IP，一格一格看</h2>
           <p class="mt-2 text-sm leading-7 text-ink-soft">
-            每个 IP 展示 8 张预览，点击任意图片打开七牛原图。可按分类筛选或搜索 IP / 角色。
+            每个 IP 展示 8 张预览，点击任意图片可放大浏览。可按分类筛选或搜索 IP / 角色。
           </p>
         </div>
         <p class="font-mono text-[10px] tracking-[0.2em] text-ink-faint">
-          显示 <span data-gallery-count class="text-vermilion">{aiGalleryIps.length}</span> / {aiGalleryIps.length} 个 IP
+          显示 <span data-gallery-count class="text-vermilion">{imageGalleryIps.length}</span> / {imageGalleryIps.length} 个 IP
         </p>
       </div>
 
@@ -114,7 +111,7 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
               >
                 {category}
                 <span class="ml-1 opacity-60">
-                  {category === '全部' ? aiGalleryIps.length : categoryCounts.get(category) ?? 0}
+                  {category === '全部' ? imageGalleryIps.length : categoryCounts.get(category) ?? 0}
                 </span>
               </button>
             ))
@@ -130,14 +127,14 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
             data-gallery-search
             placeholder="搜 IP / 角色 / 年份"
             class="w-full bg-transparent font-mono text-xs tracking-wide text-ink outline-none placeholder:text-ink-faint"
-            aria-label="搜索 AI 影像馆"
+            aria-label="搜索影像馆"
           />
         </label>
       </div>
 
       <div class="mt-8 grid gap-5 lg:grid-cols-2">
         {
-          aiGalleryIps.map((item) => (
+          imageGalleryIps.map((item) => (
             <article
               data-ip-section
               data-category={item.category}
@@ -155,12 +152,14 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
               </header>
               <div class="grid grid-cols-4 gap-1.5 p-2">
                 {item.images.map((image) => (
-                  <a
-                    href={image.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`${image.alt}（打开七牛原图）`}
-                    class="group relative block aspect-[3/4] overflow-hidden border border-ink/15 bg-ink/5"
+                  <button
+                    type="button"
+                    data-lightbox-item
+                    data-group={item.id}
+                    data-full={image.sourceUrl}
+                    data-caption={image.alt}
+                    aria-label={`放大查看：${image.alt}`}
+                    class="group relative block aspect-[3/4] overflow-hidden border border-ink/15 bg-ink/5 text-left"
                   >
                     <img
                       src={image.src}
@@ -171,14 +170,14 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                     />
                     <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent px-1.5 pb-1 pt-4 font-mono text-[7px] tracking-[0.1em] text-cream/80 opacity-0 transition-opacity group-hover:opacity-100">
-                      原图 ↗
+                      放大 ↗
                     </span>
-                  </a>
+                  </button>
                 ))}
               </div>
               <footer class="flex items-center justify-between gap-2 border-t border-ink/10 px-4 py-2 font-mono text-[8px] tracking-[0.12em] text-ink-faint">
-                <span>AI 复原 · 非原剧照</span>
-                <span>克鲁鲁大王 / 七牛云</span>
+                <span>角色影像 · 非原剧照</span>
+                <span>克鲁鲁大王</span>
               </footer>
             </article>
           ))
@@ -193,7 +192,7 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
         <div class="flex flex-col items-start justify-between gap-5 border-[1.5px] border-ink bg-night p-6 text-cream shadow-print sm:flex-row sm:items-center sm:p-8">
           <div>
             <p class="font-display text-2xl">想找原剧海报？</p>
-            <p class="mt-1 text-sm text-cream/55">AI 复原图是另一种想象；回到影视页看当年的院线海报与剧集档案。</p>
+            <p class="mt-1 text-sm text-cream/55">角色影像是另一种想象；回到影视页看当年的院线海报与剧集档案。</p>
           </div>
           <div class="flex flex-wrap gap-3">
             <a href="/movies/" class="btn-retro border-mustard bg-mustard text-ink hover:bg-cream">去影视海报墙</a>
@@ -205,6 +204,6 @@ const previewTotal = aiGalleryIps.reduce((sum, item) => sum + item.images.length
   </section>
 
   <script>
-    import '../scripts/ai-gallery';
+    import '../scripts/gallery';
   </script>
 </BaseLayout>

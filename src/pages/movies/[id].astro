@@ -54,7 +54,7 @@ const gallery: ImageCredit[] = Array.from(
     ),
   ).values(),
 );
-const hasAiGallery = gallery.some((image) => (image.license ?? '').includes('AI'));
+const hasRoleGallery = gallery.some((image) => (image.license ?? '').includes('角色影像'));
 
 const yearEvents = eventsForYear(movie.year).slice(0, 4);
 
@@ -266,27 +266,37 @@ const metaDescription = `${movie.title}（${movie.year}，${movie.type}，${movi
               <Reveal delay={90}>
                 <div class="mt-12">
                   <p class="label-mono text-vermilion">图片 · Gallery</p>
-                  {hasAiGallery && (
+                  {hasRoleGallery && (
                     <p class="mt-2 border-l-2 border-mustard/60 pl-3 text-xs leading-6 text-ink-faint">
-                      以下为「克鲁鲁大王」AI 复原作品，非原剧剧照，仅作角色形象参考；版权与肖像相关权利归原作者。
+                      以下为「克鲁鲁大王」的影视角色影像，非原剧剧照，仅作角色形象参考；版权与肖像相关权利归原作者。
                     </p>
                   )}
                   <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     {gallery.map((image) => (
                       <figure class="border-[1.5px] border-ink bg-cream p-2 shadow-print-sm">
-                        <img
-                          src={image.src}
-                          alt={image.alt}
-                          loading="lazy"
-                          decoding="async"
-                          data-fallback={image.sourceUrl}
-                          class="aspect-[4/3] w-full object-cover"
-                        />
+                        <button
+                          type="button"
+                          data-lightbox-item
+                          data-group={movie.id}
+                          data-full={image.sourceUrl}
+                          data-caption={image.alt}
+                          aria-label={`放大查看：${image.alt}`}
+                          class="group block w-full"
+                        >
+                          <img
+                            src={image.src}
+                            alt={image.alt}
+                            loading="lazy"
+                            decoding="async"
+                            data-fallback={image.sourceUrl}
+                            class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          />
+                        </button>
                         <figcaption class="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 font-mono text-[9px] leading-5 text-ink-faint">
                           <span class="line-clamp-1">{image.title ?? image.alt}</span>
                           <span>{image.author ?? '佚名'}{image.license ? ` · ${image.license}` : ''}</span>
                         </figcaption>
-                        {image.sourceUrl && (
+                        {image.sourceUrl && image.author !== '克鲁鲁大王' && (
                           <a
                             href={image.sourceUrl}
                             target="_blank"
