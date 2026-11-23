@@ -11,3 +11,7 @@ dist/
 # 内部协作/缓存
 .dsh/
 .pnpm-store/
+
+# 用户提供的图片索引/原始图集，不入库
+.import/
+images_by_ip3.zip
