@@ -48,7 +48,7 @@ const credits = [
   },
   {
     title: '封面与实拍图',
-    body: '书籍、音乐、影视的封面由程序按标题与年份生成，不使用图库图片。老物件详情页的实拍图来自 Wikimedia Commons 等公开授权来源（CC0 / 公有领域 / CC BY / CC BY-SA），逐张标注作者、协议与原始页面，见下方「图片来源」。所有图片都已下载到站内，不请求外部图床。',
+    body: '音乐专辑封面来自 QQ 音乐/网易云音乐，影视海报来自豆瓣公开页面与 Bing 图片（含 TMDB 官方海报），已下载到站内并逐张记录来源。老物件实拍图来自 Wikimedia Commons 等公开授权来源（CC0 / 公有领域 / CC BY / CC BY-SA）。AI 影像馆的角色图由抖音创作者「克鲁鲁大王」用 AI 复原，托管在七牛云，仅作角色形象参考。',
   },
   {
     title: '引用与版权',
@@ -99,6 +99,12 @@ const craftNotes = [
 ];
 
 const changelog = [
+  {
+    date: '2026.11',
+    tag: 'AI 影像',
+    title: 'AI 影像馆上线',
+    note: '收录抖音创作者「克鲁鲁大王」的 57 个影视 IP、5025 张 AI 复原角色图；图片托管七牛云，详情页与影像馆均标注「AI 生成 · 非原剧照」。',
+  },
   {
     date: '2026.10',
     tag: '详情页',
@@ -375,7 +381,9 @@ const changelog = [
               <p class="label-mono text-vermilion">Image Credits</p>
               <h3 class="mt-2 font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight text-ink">图片来源</h3>
               <p class="mt-2 max-w-2xl text-sm leading-7 text-ink-soft text-pretty">
-                老物件详情页的实拍图来自 Wikimedia Commons 等公开授权图库，全部下载到站内，不请求外部图床。每张图保留作者、协议和原始页面。
+                老物件实拍图来自 Wikimedia Commons，逐张标注作者、协议和原始页面。音乐/影视封面与海报来源见 <a href="https://github.com/mobiuslearning/mobius.goldenyears/blob/dsh-dev/docs/cover-credits.md" target="_blank" rel="noopener noreferrer" class="text-vermilion underline">封面来源清单</a>；
+                AI 复原角色图托管于七牛云，见 <a href="/ai-gallery/" class="text-vermilion underline">AI 影像馆</a> 与
+                <a href="https://github.com/mobiuslearning/mobius.goldenyears/blob/dsh-dev/docs/gallery-import.md" target="_blank" rel="noopener noreferrer" class="text-vermilion underline">导入说明</a>。
               </p>
             </div>
             <span class:list={['stamp shrink-0', imageCredits.length > 0 ? 'text-jade' : 'text-ink-faint']}>

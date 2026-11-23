@@ -1,50 +1,54 @@
-# 导入「克鲁鲁大王」AI 影视复原图集
+# AI 影视复原图集（七牛云）
 
-## 当前状态（重要）
+## 数据来源
 
-`images_by_ip3.zip` 里**没有图片本体**。解压后只有：
+- 索引：`images_by_ip3.zip` 中的 `图片索引.json`（226 个作品 / 57 个 IP / 5025 张）
+- 图片：`images.zip` 原始图，已上传七牛云空间 `mobius-blog`，域名 `https://img.mobius.cool`
+- 映射表：`七牛上传映射表.json`（`flat` 数组，含每张图的 `url / key / ip / work`）
 
-- `图片索引.json` / `图片索引.md`：226 个作品、57 个 IP 的识别索引；
-- `按角色索引.json` / `按角色索引.md`：角色/演员信息；
-- 226 个无扩展名的文本文件，每个只有一行：
-  `/Users/mobius/WorkBuddy/2026-10-17-00-21-11/douyin-kllulu/images_full/<作品目录>`
+> 这些图是抖音创作者「克鲁鲁大王」的 **AI 复原作品**（原视频标注“虚构演绎，仅供娱乐”），
+> **不是电影/电视剧原版剧照或海报**。站点中所有相关图片均标注「AI 复原 · 非原剧照」，
+> 版权与肖像相关权利归创作者及原权利人。
 
-这些是上一台机器上的绝对路径，本机不存在，zip 内也没有任何 `.jpg/.png/.webp`。
-所以目前无法直接把图片加进网站。
+## 生成的数据（已提交）
 
-## 需要你提供的
+- `src/data/galleries.ts`：与本站影视匹配的 **11 部** AI 图集（每部 12 张），影视详情页自动展示。
+- `src/data/aiGallery.ts`：全部 **57 个 IP**、**5025 张**图片统计，每个 IP 选 8 张预览，供 `/ai-gallery/` 使用。
+- 页面：`/ai-gallery/`（导航「影像馆」），支持分类筛选和 IP/角色搜索。
+- 所有图片 `src` 直接使用七牛云 URL（带 `?imageView2/2/w/600` 或 `/w/900` 缩略图参数），
+  点击图片打开七牛原图；不复制任何图片到本地仓库。
+- 加载失败时 `<img onerror>` 自动回退到原图 URL。
 
-把真正的 `images_full/` 文件夹放到项目根目录的 `.import/` 下（已加入 `.gitignore`，不会提交）：
+## 重新生成
+
+把用户提供的原始文件放在项目根目录（已加入 `.gitignore`，不会提交）：
 
 ```
-.import/
-├─ 图片索引.json          # 从 images_by_ip3.zip 里取出
-└─ images_full/
-   ├─ 001_20260527_虚构演绎.../   # 每个作品一个目录，里面是图片
-   ├─ 002_20260412_虚构演绎.../
-   └─ ...
+七牛上传映射表.json
+.import/图片索引.json
 ```
 
-## 导入命令
+然后执行：
 
 ```bash
-# 1. 预览匹配结果，不复制、不写文件
-python3 scripts/import-gallery.py
-
-# 2. 确认后导入（复制并压缩为 webp，生成 src/data/galleries.ts）
-python3 scripts/import-gallery.py --write
+python3 scripts/build-ai-gallery.py
 ```
 
-脚本会：
+脚本会重新生成 `src/data/galleries.ts` 与 `src/data/aiGallery.ts`。
 
-1. 按索引里的 `final_ip` / `ip` 与本站 64 部影视标题匹配（预计可匹配约 12 部：西游记、红楼梦、新白娘子传奇、唐伯虎点秋香、射雕英雄传、三国演义、大话西游、神雕侠侣、还珠格格、仙剑奇侠传、武林外传等）；
-2. 从 `images_full/<作品目录>/` 里读取图片，每个条目最多取 6 张，转成 1600px WebP；
-3. 写入 `public/images/gallery/<movie-id>/` 和 `src/data/galleries.ts`；
-4. 影视详情页会自动出现「AI 复原图集」，并标注**「AI 复原 · 非原剧照」**。
+## 调整数量
 
-## 重要说明
+- 影视详情页每部图片数：`--movie-limit 12`
+- 影像馆每个 IP 预览数：`--ip-limit 8`
 
-- 这些图是抖音创作者「克鲁鲁大王」的 **AI 复原作品**（原视频文案均标注“虚构演绎，仅供娱乐”），**不是电影/电视剧原版剧照或海报**。
-- 因此脚本只把它们放进详情页的「图片 · Gallery」，并明确标注 AI 与非剧照；不会替换正式海报，避免误导。
-- 使用前请确认你已获得创作者许可；如无许可，建议只在本地欣赏，不公开部署。
-- 想要更多真实海报/剧照，可以继续用豆瓣/Bing 海报管线，或提供有授权的图片。
+```bash
+python3 scripts/build-ai-gallery.py --movie-limit 16 --ip-limit 12
+```
+
+## 图片来源与版权
+
+- 图片 CDN：`https://img.mobius.cool/影视剧/<IP>/<作品编号>/<序号>.webp`
+- 创作者：克鲁鲁大王（抖音）
+- 图片性质：AI 生成 / 非原剧照
+- 如创作者或原权利人要求，可在 `src/data/galleries.ts`、`src/data/aiGallery.ts` 删除对应条目，
+  页面会自动隐藏相关图集。
