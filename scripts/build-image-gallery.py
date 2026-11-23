@@ -202,6 +202,34 @@ def main():
     total_images = len(flat)
     print(f'影像馆：{len(ips)} 个 IP，展示 {sum(len(x["images"]) for x in ips)} 张（总 {total_images} 张）')
 
+    # 每个 IP 的完整图集（供 /gallery/<id>/ 详情页使用）
+    by_id = {item['id']: item for item in ips}
+    full_lines = [
+        "import type { ImageCredit } from '../types';",
+        '',
+        '/** 影像馆各 IP 的全部图片（由 scripts/build-image-gallery.py 生成）。 */',
+        'export const galleryFull: Record<string, ImageCredit[]> = {',
+    ]
+    for item in ips:
+        images = by_ip[item['ip']]
+        full_lines.append(f"  '{item['id']}': [")
+        for image in images:
+            credit_data = credit(image, item['ip'], item['category'], 600)
+            full_lines += [
+                '    {',
+                f"      src: '{ts(credit_data['src'])}',",
+                f"      alt: '{ts(credit_data['alt'])}',",
+                f"      title: '{ts(credit_data['title'])}',",
+                f"      author: '{ts(credit_data['author'])}',",
+                f"      license: '{ts(credit_data['license'])}',",
+                f"      sourceUrl: '{ts(credit_data['sourceUrl'])}',",
+                '    },',
+            ]
+        full_lines.append('  ],')
+    full_lines += ['};', '']
+    open(os.path.join(ROOT, 'src/data/imageGalleryFull.ts'), 'w').write('\n'.join(full_lines))
+    print(f'完整图集：{sum(len(v) for v in by_ip.values())} 张 → src/data/imageGalleryFull.ts')
+
     lines = [
         "import type { ImageCredit } from '../types';",
         '',

@@ -29,8 +29,9 @@ const previewTotal = imageGalleryIps.reduce((sum, item) => sum + item.images.len
           <span class="mt-2 block text-[0.44em] tracking-[0.3em] text-stroke-cream">RESTORED MEMORIES</span>
         </h1>
         <p class="mt-6 max-w-xl text-[15px] leading-8 text-cream/65">
-          抖音创作者「克鲁鲁大王」整理的影视角色群像：57 个 IP、226 部作品、5025 张图。
-          它们不是原剧剧照，而是另一双手对旧角色的重新想象。
+          有些脸，是在雪花点里第一次看清的：暑假下午的电视、录像厅的最后一排、借来的光盘。
+          多年以后，剧情已经记不全了，那些眉眼、发髻和衣角还停在记忆里。
+          这里收着 57 个 IP、226 部作品、5025 张角色影像，像翻出一本没有编号的旧相册——你认得几张？
         </p>
 
         <p class="mt-6 flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-cream/40">
@@ -87,7 +88,7 @@ const previewTotal = imageGalleryIps.reduce((sum, item) => sum + item.images.len
           <p class="label-mono text-vermilion">Browse · 按 IP 浏览</p>
           <h2 class="mt-2 font-display text-[clamp(1.8rem,3.5vw,2.6rem)] text-ink">57 个 IP，一格一格看</h2>
           <p class="mt-2 text-sm leading-7 text-ink-soft">
-            每个 IP 展示 8 张预览，点击任意图片可放大浏览。可按分类筛选或搜索 IP / 角色。
+            每个 IP 展示 8 张预览，点击任意图片可放大浏览；点卡片底部「查看全部」进入该 IP 的完整图集。57 个 IP 共 5025 张，全部可看。
           </p>
         </div>
         <p class="font-mono text-[10px] tracking-[0.2em] text-ink-faint">
@@ -177,7 +178,9 @@ const previewTotal = imageGalleryIps.reduce((sum, item) => sum + item.images.len
               </div>
               <footer class="flex items-center justify-between gap-2 border-t border-ink/10 px-4 py-2 font-mono text-[8px] tracking-[0.12em] text-ink-faint">
                 <span>角色影像 · 非原剧照</span>
-                <span>克鲁鲁大王</span>
+                <a href={`/gallery/${item.id}/`} class="text-vermilion underline decoration-vermilion/30 underline-offset-2 transition-colors hover:text-ink">
+                  查看全部 {item.count} 张 →
+                </a>
               </footer>
             </article>
           ))
