@@ -1,0 +1,212 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/shared/Reveal.astro';
+import { imageGalleryIps, imageGalleryStats } from '../data/imageGallery';
+
+const categories = ['全部', '电影', '电视剧', '动画', '游戏', '未分类'];
+const categoryCounts = new Map<string, number>();
+for (const item of imageGalleryIps) {
+  categoryCounts.set(item.category, (categoryCounts.get(item.category) ?? 0) + 1);
+}
+const previewTotal = imageGalleryIps.reduce((sum, item) => sum + item.images.length, 0);
+---
+
+<BaseLayout
+  title="影像馆"
+  description="57 个影视 IP、5025 张角色影像：来自抖音创作者「克鲁鲁大王」的影视角色群像，不是原剧剧照。按分类筛选、按 IP 或角色搜索，点击图片可放大浏览。"
+>
+  <!-- ============================== HERO ============================== -->
+  <section class="relative overflow-hidden border-b-[1.5px] border-ink bg-night text-cream">
+    <div class="pointer-events-none absolute inset-0 opacity-[0.08] line-grid"></div>
+    <div class="scanlines pointer-events-none absolute inset-0 opacity-50"></div>
+    <div class="pointer-events-none absolute -right-20 top-1/3 h-80 w-80 rounded-full border-[18px] border-vermilion/10"></div>
+
+    <div class="relative mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8 lg:py-24">
+      <div>
+        <p class="font-mono text-[10px] tracking-[0.3em] text-mustard">RESTORED ARCHIVE · 57 IPS</p>
+        <h1 class="mt-5 font-display text-[clamp(2.6rem,6vw,4.8rem)] leading-[0.95]">
+          影像馆
+          <span class="mt-2 block text-[0.44em] tracking-[0.3em] text-stroke-cream">RESTORED MEMORIES</span>
+        </h1>
+        <p class="mt-6 max-w-xl text-[15px] leading-8 text-cream/65">
+          有些脸，是在雪花点里第一次看清的：暑假下午的电视、录像厅的最后一排、借来的光盘。
+          多年以后，剧情已经记不全了，那些眉眼、发髻和衣角还停在记忆里。
+          这里收着 57 个 IP、226 部作品、5025 张角色影像，像翻出一本没有编号的旧相册——你认得几张？
+        </p>
+
+        <p class="mt-6 flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-cream/40">
+          <span class="h-1.5 w-1.5 rounded-full bg-jade"></span>
+          点击任意图片可放大浏览
+        </p>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a href="/movies/" class="btn-retro border-mustard bg-mustard text-ink hover:bg-cream">回到影视海报墙</a>
+          <a href="/timeline/" class="btn-retro border-cream/50 bg-transparent text-cream hover:bg-cream hover:text-ink">打开时光轴</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="border-[1.5px] border-cream/20 bg-night-soft/70 p-6">
+          <div class="flex items-center justify-between border-b border-cream/15 pb-3">
+            <span class="font-mono text-[9px] tracking-[0.26em] text-cream/40">ARCHIVE SUMMARY</span>
+            <span class="flex gap-1.5"><i class="h-2 w-2 rounded-full bg-vermilion"></i><i class="h-2 w-2 rounded-full bg-mustard"></i><i class="h-2 w-2 rounded-full bg-jade"></i></span>
+          </div>
+          <dl class="mt-5 grid grid-cols-2 gap-px bg-cream/10">
+            <div class="bg-night px-4 py-4">
+              <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">影视 IP</dt>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.ips}</dd>
+            </div>
+            <div class="bg-night px-4 py-4">
+              <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">作品</dt>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.works}</dd>
+            </div>
+            <div class="bg-night px-4 py-4">
+              <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">原图</dt>
+              <dd class="mt-1 font-display text-3xl text-mustard">{imageGalleryStats.images.toLocaleString('zh-CN')}</dd>
+            </div>
+            <div class="bg-night px-4 py-4">
+              <dt class="font-mono text-[9px] tracking-[0.18em] text-cream/35">本页预览</dt>
+              <dd class="mt-1 font-display text-3xl text-mustard">{previewTotal}</dd>
+            </div>
+          </dl>
+          <p class="mt-4 border-t border-cream/15 pt-3 font-mono text-[9px] tracking-[0.16em] text-cream/30">
+            点击图片放大 · 键盘 ← → 切换
+          </p>
+        </div>
+        <span class="absolute -bottom-3 right-4 rotate-2 border-[1.5px] border-cream/30 bg-night px-2 py-1 font-mono text-[9px] tracking-[0.2em] text-cream/50">
+          ROLE PORTRAITS · NOT STILLS
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 图集 ============================== -->
+  <section class="bg-paper-texture py-14 sm:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-6 border-b-[1.5px] border-ink/20 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="label-mono text-vermilion">Browse · 按 IP 浏览</p>
+          <h2 class="mt-2 font-display text-[clamp(1.8rem,3.5vw,2.6rem)] text-ink">57 个 IP，一格一格看</h2>
+          <p class="mt-2 text-sm leading-7 text-ink-soft">
+            每个 IP 展示 8 张预览，点击任意图片可放大浏览；点卡片底部「查看全部」进入该 IP 的完整图集。57 个 IP 共 5025 张，全部可看。
+          </p>
+        </div>
+        <p class="font-mono text-[10px] tracking-[0.2em] text-ink-faint">
+          显示 <span data-gallery-count class="text-vermilion">{imageGalleryIps.length}</span> / {imageGalleryIps.length} 个 IP
+        </p>
+      </div>
+
+      <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-wrap gap-2" data-gallery-filters>
+          {
+            categories.map((category) => (
+              <button
+                type="button"
+                data-gallery-filter
+                data-value={category}
+                class:list={[
+                  'border-[1.5px] px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] transition-colors',
+                  category === '全部' ? 'border-ink bg-ink text-cream' : 'border-ink/25 bg-cream text-ink-soft hover:border-ink',
+                ]}
+                aria-pressed={category === '全部' ? 'true' : 'false'}
+              >
+                {category}
+                <span class="ml-1 opacity-60">
+                  {category === '全部' ? imageGalleryIps.length : categoryCounts.get(category) ?? 0}
+                </span>
+              </button>
+            ))
+          }
+        </div>
+        <label class="flex w-full items-center gap-2 border-[1.5px] border-ink/30 bg-cream px-3 py-2 lg:w-72">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-faint" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" stroke-linecap="square" />
+          </svg>
+          <input
+            type="search"
+            data-gallery-search
+            placeholder="搜 IP / 角色 / 年份"
+            class="w-full bg-transparent font-mono text-xs tracking-wide text-ink outline-none placeholder:text-ink-faint"
+            aria-label="搜索影像馆"
+          />
+        </label>
+      </div>
+
+      <div class="mt-8 grid gap-5 lg:grid-cols-2">
+        {
+          imageGalleryIps.map((item) => (
+            <article
+              data-ip-section
+              data-category={item.category}
+              data-search={`${item.ip} ${item.category} ${item.years.join(' ')} ${item.images.map((image) => image.alt).join(' ')}`.toLowerCase()}
+              class="paper-card overflow-hidden"
+            >
+              <header class="flex flex-wrap items-end justify-between gap-2 border-b border-ink/15 px-4 py-3">
+                <div class="min-w-0">
+                  <p class="font-mono text-[9px] tracking-[0.2em] text-vermilion">{item.category}{item.years.length > 0 ? ` · ${item.years.join(' / ')}` : ''}</p>
+                  <h3 class="mt-0.5 truncate font-display text-2xl text-ink">{item.ip}</h3>
+                </div>
+                <p class="shrink-0 font-mono text-[9px] leading-4 tracking-[0.12em] text-ink-faint">
+                  {item.count} 张原图<br />{item.works} 部作品
+                </p>
+              </header>
+              <div class="grid grid-cols-4 gap-1.5 p-2">
+                {item.images.map((image) => (
+                  <button
+                    type="button"
+                    data-lightbox-item
+                    data-group={item.id}
+                    data-full={image.sourceUrl}
+                    data-caption={image.alt}
+                    aria-label={`放大查看：${image.alt}`}
+                    class="group relative block aspect-[3/4] overflow-hidden border border-ink/15 bg-ink/5 text-left"
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      loading="lazy"
+                      decoding="async"
+                      data-fallback={image.sourceUrl}
+                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent px-1.5 pb-1 pt-4 font-mono text-[7px] tracking-[0.1em] text-cream/80 opacity-0 transition-opacity group-hover:opacity-100">
+                      放大 ↗
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <footer class="flex items-center justify-between gap-2 border-t border-ink/10 px-4 py-2 font-mono text-[8px] tracking-[0.12em] text-ink-faint">
+                <span>角色影像 · 非原剧照</span>
+                <a href={`/gallery/${item.id}/`} class="text-vermilion underline decoration-vermilion/30 underline-offset-2 transition-colors hover:text-ink">
+                  查看全部 {item.count} 张 →
+                </a>
+              </footer>
+            </article>
+          ))
+        }
+      </div>
+
+      <p data-gallery-empty hidden class="mt-10 border-[1.5px] border-dashed border-ink/30 bg-cream/60 p-8 text-center font-display text-lg text-ink-soft">
+        没有找到匹配的 IP，换个关键词试试。
+      </p>
+
+      <Reveal class="mt-14">
+        <div class="flex flex-col items-start justify-between gap-5 border-[1.5px] border-ink bg-night p-6 text-cream shadow-print sm:flex-row sm:items-center sm:p-8">
+          <div>
+            <p class="font-display text-2xl">想找原剧海报？</p>
+            <p class="mt-1 text-sm text-cream/55">角色影像是另一种想象；回到影视页看当年的院线海报与剧集档案。</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="/movies/" class="btn-retro border-mustard bg-mustard text-ink hover:bg-cream">去影视海报墙</a>
+            <a href="/about/#image-credits" class="btn-retro border-cream/50 bg-transparent text-cream hover:bg-cream hover:text-ink">查看图片来源</a>
+          </div>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/gallery';
+  </script>
+</BaseLayout>

@@ -13,7 +13,7 @@ const columns = [
   {
     title: '拾光收藏',
     links: site.nav
-      .filter((item) => ['/music/', '/books/', '/movies/', '/toys/'].includes(item.href))
+      .filter((item) => ['/music/', '/books/', '/movies/', '/gallery/', '/toys/'].includes(item.href))
       .map((item) => ({ label: item.label, href: item.href })),
   },
   {

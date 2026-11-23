@@ -28,6 +28,7 @@ export const site = {
     { label: '音乐', href: '/music/' },
     { label: '书籍', href: '/books/' },
     { label: '影视', href: '/movies/' },
+    { label: '影像馆', href: '/gallery/' },
     { label: '老物件', href: '/toys/' },
     { label: '时光机', href: '/time-machine/' },
     { label: '关于', href: '/about/' },

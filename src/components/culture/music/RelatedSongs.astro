@@ -28,7 +28,7 @@ const { songs, current, eraLabel } = Astro.props;
           href={`/music/${song.id}/`}
           class="group relative flex flex-col border-[1.5px] border-ink bg-cream p-2.5 shadow-print-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-print focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vermilion"
         >
-          <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" image={song.image} />
+          <CoverArt title={song.title} subtitle={song.artist} year={song.year} kind="music" image={song.image} seed={song.id} />
           <p class="mt-2.5 font-mono text-[9px] tracking-[0.16em] text-ink-faint">
             {song.year}
             <span class="mx-1 text-ink/25">·</span>

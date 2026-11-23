@@ -1,6 +1,7 @@
 ---
 import type { CoverKind } from '../../lib/theme';
 import { hashString, paletteFor } from '../../lib/theme';
+import { coverMap } from '../../data/covers';
 
 interface Props {
   title: string;
@@ -26,6 +27,10 @@ const {
   class: className = '',
 } = Astro.props;
 
+// 支持 poster-/featured-/detail-/related- 等 seed 前缀，统一回落到作品 id 的封面
+const normalizedSeed = seed?.replace(/^(poster|featured|detail|related)-/, '');
+const resolvedImage = image ?? (seed ? coverMap[seed] : undefined) ?? (normalizedSeed ? coverMap[normalizedSeed] : undefined);
+
 const palette = paletteFor(seed ?? `${kind}-${title}-${year ?? ''}`, kind);
 const h = hashString(`${kind}-${title}`);
 const rot = (h % 8) - 4;
@@ -42,10 +47,10 @@ const defaultLabel = {
 
 <figure class={`group/cover @container relative overflow-hidden border-[1.5px] border-ink bg-cream ${ratioClass} ${className}`}>
   {
-    image ? (
+    resolvedImage ? (
       <>
         <img
-          src={image}
+          src={resolvedImage}
           alt={`${title} 封面`}
           loading="lazy"
           decoding="async"

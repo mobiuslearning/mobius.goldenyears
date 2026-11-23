@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { imageGalleryIps } from '../../data/imageGallery';
+import { galleryFull } from '../../data/imageGalleryFull';
+
+export function getStaticPaths() {
+  return imageGalleryIps.map((item) => ({ params: { id: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const images = galleryFull[item.id] ?? item.images;
+const index = imageGalleryIps.findIndex((entry) => entry.id === item.id);
+const prevIp = index > 0 ? imageGalleryIps[index - 1] : undefined;
+const nextIp = index >= 0 && index < imageGalleryIps.length - 1 ? imageGalleryIps[index + 1] : undefined;
+---
+
+<BaseLayout
+  title={`${item.ip} · 影像馆`}
+  description={`${item.ip} 的角色影像合集，共 ${item.count} 张。点击图片可放大浏览。`}
+>
+  <section class="relative overflow-hidden border-b-[1.5px] border-ink bg-night text-cream">
+    <div class="pointer-events-none absolute inset-0 opacity-[0.08] line-grid"></div>
+    <div class="scanlines pointer-events-none absolute inset-0 opacity-40"></div>
+    <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <nav class="flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-cream/40" aria-label="面包屑">
+        <a href="/gallery/" class="transition-colors hover:text-mustard">影像馆</a>
+        <span aria-hidden="true">/</span>
+        <span class="text-cream/70">{item.ip}</span>
+      </nav>
+
+      <div class="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="font-mono text-[10px] tracking-[0.24em] text-vermilion">
+            {item.category}{item.years.length > 0 ? ` · ${item.years.join(' / ')}` : ''}
+          </p>
+          <h1 class="mt-2 font-display text-[clamp(2.4rem,6vw,4.6rem)] leading-none text-cream">{item.ip}</h1>
+          <p class="mt-4 max-w-xl text-sm leading-7 text-cream/55">
+            {item.works} 部作品里留下的 {item.count} 张角色影像。点击任意图片放大，键盘 ← → 可切换。
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="/gallery/" class="btn-retro border-cream/50 bg-transparent text-cream hover:bg-cream hover:text-ink">返回影像馆</a>
+          <span class="border border-cream/20 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-cream/50">
+            共 {images.length} 张
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-paper-texture py-10 sm:py-14">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4 border-b-[1.5px] border-ink/20 pb-4">
+        <p class="font-mono text-[10px] tracking-[0.2em] text-ink-faint">全部 {images.length} 张 · 点击放大</p>
+        <p class="font-mono text-[9px] tracking-[0.16em] text-ink-faint">克鲁鲁大王 · 角色影像</p>
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+        {
+          images.map((image, imageIndex) => (
+            <button
+              type="button"
+              data-lightbox-item
+              data-group={item.id}
+              data-full={image.sourceUrl}
+              data-caption={image.alt}
+              aria-label={`放大查看第 ${imageIndex + 1} 张：${image.alt}`}
+              class="group relative block aspect-[3/4] overflow-hidden border border-ink/15 bg-ink/5 text-left"
+            >
+              <img
+                src={image.src}
+                alt={image.alt}
+                loading="lazy"
+                decoding="async"
+                data-fallback={image.sourceUrl}
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+              <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent px-2 pb-1.5 pt-8 font-mono text-[8px] tracking-[0.12em] text-cream/80 opacity-0 transition-opacity group-hover:opacity-100">
+                第 {imageIndex + 1} 张 · 放大 ↗
+              </span>
+            </button>
+          ))
+        }
+      </div>
+
+      <nav class="mt-10 flex flex-col gap-3 border-t border-ink/15 pt-6 sm:flex-row sm:items-center sm:justify-between" aria-label="切换 IP">
+        <div class="flex flex-wrap gap-3">
+          {
+            prevIp && (
+              <a href={`/gallery/${prevIp.id}/`} class="border-[1.5px] border-ink/20 bg-cream px-4 py-3 font-mono text-[10px] tracking-[0.1em] text-ink transition-colors hover:border-ink">
+                ← {prevIp.ip}
+              </a>
+            )
+          }
+          {
+            nextIp && (
+              <a href={`/gallery/${nextIp.id}/`} class="border-[1.5px] border-ink/20 bg-cream px-4 py-3 font-mono text-[10px] tracking-[0.1em] text-ink transition-colors hover:border-ink">
+                {nextIp.ip} →
+              </a>
+            )
+          }
+        </div>
+        <a href="/gallery/" class="font-mono text-[10px] tracking-[0.18em] text-vermilion underline decoration-vermilion/40 underline-offset-4">
+          查看其他 56 个 IP
+        </a>
+      </nav>
+    </div>
+  </section>
+</BaseLayout>

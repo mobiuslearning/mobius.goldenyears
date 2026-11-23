@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/shared/Nav.astro';
 import Footer from '../components/shared/Footer.astro';
+import Lightbox from '../components/shared/Lightbox.astro';
 import { site } from '../data/site';
 
 interface Props {
@@ -76,6 +77,8 @@ const ogImage = new URL(image, siteUrl).toString();
 
     <Footer />
 
+    <Lightbox />
+
     <button
       type="button"
       data-back-to-top
@@ -92,6 +95,8 @@ const ogImage = new URL(image, siteUrl).toString();
 
     <script>
       import '../scripts/site';
+      import '../scripts/image-fallback';
+      import '../scripts/lightbox';
     </script>
     <slot name="scripts" />
   </body>
